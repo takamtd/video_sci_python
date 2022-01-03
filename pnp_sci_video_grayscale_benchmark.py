@@ -24,7 +24,6 @@ from pnp_sci import admmdenoise_cacti
 
 from utils import (A_, At_)
 
-
 # In[2]:
 
 
@@ -92,8 +91,8 @@ for datname, nframe in zip(alldatname, allnframes):
     # In[4]:
 
 
-    ## [2.3] GAP/ADMM-TV
-    ### [2.3.1] GAP-TV
+    # [2.3] GAP/ADMM-TV
+    ## [2.3.1] GAP-TV
     projmeth = 'gap' # projection method
     _lambda = 1 # regularization factor
     accelerate = True # enable accelerated version of GAP
@@ -129,7 +128,7 @@ for datname, nframe in zip(alldatname, allnframes):
     denoiser = 'ffdnet' # video non-local network 
     noise_estimate = False # disable noise estimation for GAP
     sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
-    iter_max = [10, 10, 10, 10] # maximum number of iterations
+    iter_max = [20, 20, 20, 20] # maximum number of iterations
     # sigma    = [12/255, 6/255] # pre-set noise standard deviation
     # iter_max = [10,10] # maximum number of iterations
     useGPU = True # use GPU
@@ -155,14 +154,25 @@ for datname, nframe in zip(alldatname, allnframes):
     model.load_state_dict(state_dict)
     model.eval() # evaluation mode
 
-    vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
-                                              projmeth=projmeth, v0=None, orig=orig,
-                                              iframe=iframe, nframe=nframe,
-                                              MAXB=MAXB, maskdirection='plain',
-                                              _lambda=_lambda, accelerate=accelerate,
-                                              denoiser=denoiser, model=model, 
-                                              iter_max=iter_max, sigma=sigma)
-
+    if projmeth.lower() == 'gap':
+        vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
+                                                projmeth=projmeth, v0=None, orig=orig,
+                                                iframe=iframe, nframe=nframe,
+                                                MAXB=MAXB, maskdirection='plain',
+                                                _lambda=_lambda, accelerate=accelerate,
+                                                denoiser=denoiser, model=model, 
+                                                iter_max=iter_max, sigma=sigma)
+    elif projmeth.lower() == 'admm':
+        vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
+                                                projmeth=projmeth, v0=None, orig=orig,
+                                                iframe=iframe, nframe=nframe,
+                                                MAXB=MAXB, maskdirection='plain',
+                                                _lambda=_lambda,
+                                                denoiser=denoiser, model=model, 
+                                                iter_max=iter_max, sigma=sigma)
+    else:
+        print('Unsupported projection method %s' % projmeth.upper())
+        
     print('{}-{} PSNR {:2.2f} dB, SSIM {:.4f}, running time {:.1f} seconds.'.format(
         projmeth.upper(), denoiser.upper(), mean(psnr_gapffdnet), mean(ssim_gapffdnet), tgapffdnet))
 
@@ -204,14 +214,24 @@ for datname, nframe in zip(alldatname, allnframes):
     # Sets the model in evaluation mode (e.g. it removes BN)
     model.eval()
 
-    vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
-                                              projmeth=projmeth, v0=None, orig=orig,
-                                              iframe=iframe, nframe=nframe,
-                                              MAXB=MAXB, maskdirection='plain',
-                                              _lambda=_lambda, accelerate=accelerate, 
-                                              denoiser=denoiser, model=model, 
-                                              iter_max=iter_max, sigma=sigma)
-
+    if projmeth.lower() == 'gap':
+        vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
+                                                projmeth=projmeth, v0=None, orig=orig,
+                                                iframe=iframe, nframe=nframe,
+                                                MAXB=MAXB, maskdirection='plain',
+                                                _lambda=_lambda, accelerate=accelerate, 
+                                                denoiser=denoiser, model=model, 
+                                                iter_max=iter_max, sigma=sigma)
+    elif projmeth.lower() == 'admm':
+        vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
+                                                projmeth=projmeth, v0=None, orig=orig,
+                                                iframe=iframe, nframe=nframe,
+                                                MAXB=MAXB, maskdirection='plain',
+                                                _lambda=_lambda, 
+                                                denoiser=denoiser, model=model, 
+                                                iter_max=iter_max, sigma=sigma)
+    else:
+        print('Unsupported projection method %s' % projmeth.upper())
     print('{}-{} PSNR {:2.2f} dB, SSIM {:.4f}, running time {:.1f} seconds.'.format(
         projmeth.upper(), denoiser.upper(), mean(psnr_gapfastdvdnet), mean(ssim_gapfastdvdnet), tgapfastdvdnet))
 
@@ -220,22 +240,54 @@ for datname, nframe in zip(alldatname, allnframes):
     # [3.3] result demonstration of GAP-Denoise
     nmask = mask.shape[2]
     
+    SAVE_RESULT = False
+    SAVE_DATA = True
+    SAVE_MEAS = False
+
     savedmatdir = resultsdir + '/savedmat/grayscale/' + alldatname[0] + '/'
     if not os.path.exists(savedmatdir):
         os.makedirs(savedmatdir)
-    if not os.path.exists(savedmatdir + 'gaptv/'):
-        os.makedirs(savedmatdir + 'gaptv/')
-    if not os.path.exists(savedmatdir + 'gapffdnet/'):
-        os.makedirs(savedmatdir + 'gapffdnet/')
-    if not os.path.exists(savedmatdir + 'gapfastdvdnet/'):
-        os.makedirs(savedmatdir + 'gapfastdvdnet/')
+    
+    psnrall_gapffdnet = np.array(psnrall_gapffdnet)
+    psnrmean_gapffdnet = psnrall_gapffdnet.mean(axis=0)
+    print()
     # sio.savemat('{}gap{}_{}{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask),
     #             {'vgapdenoise':vgapdenoise},{'psnr_gapdenoise':psnr_gapdenoise})
-    for i in range(orig.shape[2]):
-        plt.imsave('{}gaptv/{}_gaptv_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
-        plt.imsave('{}gapffdnet/{}_gapffdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
-        plt.imsave('{}gapfastdvdnet/{}_gapfastdvdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
-
+    if SAVE_RESULT:
+        if not os.path.exists(savedmatdir + 'gaptv/'):
+            os.makedirs(savedmatdir + 'gaptv/')
+        if not os.path.exists(savedmatdir + 'gapffdnet/'):
+            os.makedirs(savedmatdir + 'gapffdnet/')
+        if not os.path.exists(savedmatdir + 'gapfastdvdnet/'):
+            os.makedirs(savedmatdir + 'gapfastdvdnet/')
+        for i in range(orig.shape[2]):
+            plt.imsave('{}gaptv/{}_gaptv_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
+            plt.imsave('{}gapffdnet/{}_gapffdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
+            plt.imsave('{}gapfastdvdnet/{}_gapfastdvdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+    
+    if SAVE_DATA:
+        if not os.path.exists(savedmatdir + 'data/'):
+            os.makedirs(savedmatdir + 'data/')
+        filelast_name = "_psnr_method1.csv"
+        psnrall_gaptv = np.array(psnrall_gaptv)
+        psnrall_gapffdnet = np.array(psnrall_gapffdnet)
+        psnrall_gapfastdvdnet = np.array(psnrall_gapfastdvdnet)
+        psnrmean_gaptv = psnrall_gaptv.mean(axis=0)
+        psnrmean_gapffdnet = psnrall_gapffdnet.mean(axis=0)
+        psnrmean_gapfastdvdnet = psnrall_gapfastdvdnet.mean(axis=0)
+        gaptv_path = savedmatdir + 'data/' + "gaptv" + filelast_name
+        ffdnet_path = savedmatdir + 'data/' + "gapffdnet" + filelast_name
+        fastdvdnet_path = savedmatdir + 'data/' + "gapfastdvdnet" + filelast_name
+        np.savetxt(gaptv_path, psnrmean_gaptv)
+        np.savetxt(ffdnet_path, psnrmean_gapffdnet)
+        np.savetxt(fastdvdnet_path, psnrmean_gapfastdvdnet)
+    
+    if SAVE_MEAS:
+        if not os.path.exists(savedmatdir + 'meas/'):
+            os.makedirs(savedmatdir + 'meas/')
+        for i in range(meas.shape[2]):
+            plt.imsave('{}meas/meas{}.jpeg'.format(savedmatdir, i), meas[:,:,i], cmap='Greys_r')
+    
     # sio.savemat('{}gap{}_{}_{:d}_sigma{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask,int(sigma[-1]*MAXB)),
     #             {'vgaptv':vgaptv, 
     #              'psnr_gaptv':psnr_gaptv,

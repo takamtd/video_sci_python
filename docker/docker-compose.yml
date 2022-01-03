@@ -6,7 +6,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ../../video_sci_python:/home/jovyan/workdir
+      - ../:/home/jovyan/workdir
     deploy:
       resources:
         reservations:
