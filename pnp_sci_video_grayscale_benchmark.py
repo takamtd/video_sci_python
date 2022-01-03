@@ -261,9 +261,14 @@ for datname, nframe in zip(alldatname, allnframes):
         if not os.path.exists(savedmatdir + 'gapfastdvdnet/'):
             os.makedirs(savedmatdir + 'gapfastdvdnet/')
         for i in range(orig.shape[2]):
-            plt.imsave('{}gaptv/{}_gaptv_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
-            plt.imsave('{}gapffdnet/{}_gapffdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
-            plt.imsave('{}gapfastdvdnet/{}_gapfastdvdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+            if i < 10:
+                plt.imsave('{}gaptv/{}_gaptv_0{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gapffdnet/{}_gapffdnet_0{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gapfastdvdnet/{}_gapfastdvdnet_0{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+            else:
+                plt.imsave('{}gaptv/{}_gaptv_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gapffdnet/{}_gapffdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gapfastdvdnet/{}_gapfastdvdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
     
     if SAVE_DATA:
         if not os.path.exists(savedmatdir + 'data/'):
