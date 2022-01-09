@@ -33,7 +33,7 @@ resultsdir = './results' # results
 
 # alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 # allnframes = [      -1,         -1,         1,       1,       -1,        -1]
-alldatname = ['kobe32']
+alldatname = ['runner40']
 allnframes = [      -1]
 
 for datname, nframe in zip(alldatname, allnframes):
@@ -97,7 +97,7 @@ for datname, nframe in zip(alldatname, allnframes):
     _lambda = 1 # regularization factor
     accelerate = True # enable accelerated version of GAP
     denoiser = 'tv' # total variation (TV)
-    iter_max = 40 # maximum number of iterations
+    iter_max = 80 # maximum number of iterations
     tv_weight = 0.3 # TV denoising weight (larger for smoother but slower)
     tv_iter_max = 5 # TV denoising maximum number of iterations each
 
@@ -127,8 +127,16 @@ for datname, nframe in zip(alldatname, allnframes):
     accelerate = True # enable accelerated version of GAP
     denoiser = 'ffdnet' # video non-local network 
     noise_estimate = False # disable noise estimation for GAP
-    sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
-    iter_max = [20, 20, 20, 20] # maximum number of iterations
+    method_type = 3
+    if method_type == 1:
+        sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
+        iter_max = [20, 20, 20, 20] # maximum number of iterations
+    elif method_type == 2:
+        sigma    = [50*0.97**i for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    else:
+        sigma    = [12/255]
+        iter_max = [80]
     # sigma    = [12/255, 6/255] # pre-set noise standard deviation
     # iter_max = [10,10] # maximum number of iterations
     useGPU = True # use GPU
@@ -189,8 +197,16 @@ for datname, nframe in zip(alldatname, allnframes):
     accelerate = True # enable accelerated version of GAP
     denoiser = 'fastdvdnet' # video non-local network 
     noise_estimate = False # disable noise estimation for GAP
-    sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
-    iter_max = [20, 20, 20, 20] # maximum number of iterations
+    method_type = 3
+    if method_type == 1:
+        sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
+        iter_max = [20, 20, 20, 20] # maximum number of iterations
+    elif method_type == 2:
+        sigma    = [50*0.97**i for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    else:
+        sigma    = [12/255]
+        iter_max = [80]
     # sigma    = [12/255] # pre-set noise standard deviation
     # iter_max = [20] # maximum number of iterations
     useGPU = True # use GPU
@@ -240,9 +256,9 @@ for datname, nframe in zip(alldatname, allnframes):
     # [3.3] result demonstration of GAP-Denoise
     nmask = mask.shape[2]
     
-    SAVE_RESULT = False
+    SAVE_RESULT = True
     SAVE_DATA = True
-    SAVE_MEAS = False
+    SAVE_MEAS = True
 
     savedmatdir = resultsdir + '/savedmat/grayscale/' + alldatname[0] + '/'
     if not os.path.exists(savedmatdir):
@@ -250,7 +266,6 @@ for datname, nframe in zip(alldatname, allnframes):
     
     psnrall_gapffdnet = np.array(psnrall_gapffdnet)
     psnrmean_gapffdnet = psnrall_gapffdnet.mean(axis=0)
-    print()
     # sio.savemat('{}gap{}_{}{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask),
     #             {'vgapdenoise':vgapdenoise},{'psnr_gapdenoise':psnr_gapdenoise})
     if SAVE_RESULT:
@@ -260,20 +275,26 @@ for datname, nframe in zip(alldatname, allnframes):
             os.makedirs(savedmatdir + 'gapffdnet/')
         if not os.path.exists(savedmatdir + 'gapfastdvdnet/'):
             os.makedirs(savedmatdir + 'gapfastdvdnet/')
+        if not os.path.exists(savedmatdir + 'gaptv/method{:d}/'.format(method_type)):
+            os.makedirs(savedmatdir + 'gaptv/method{:d}/'.format(method_type))
+        if not os.path.exists(savedmatdir + 'gapffdnet/method{:d}/'.format(method_type)):
+            os.makedirs(savedmatdir + 'gapffdnet/method{:d}/'.format(method_type))
+        if not os.path.exists(savedmatdir + 'gapfastdvdnet/method{:d}/'.format(method_type)):
+            os.makedirs(savedmatdir + 'gapfastdvdnet/method{:d}/'.format(method_type))
         for i in range(orig.shape[2]):
             if i < 10:
-                plt.imsave('{}gaptv/{}_gaptv_0{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapffdnet/{}_gapffdnet_0{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapfastdvdnet/{}_gapfastdvdnet_0{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gaptv/method{:d}/{}_gaptv_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gapffdnet/method{:d}/{}_gapffdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gapfastdvdnet/method{:d}/{}_gapfastdvdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
             else:
-                plt.imsave('{}gaptv/{}_gaptv_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapffdnet/{}_gapffdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapfastdvdnet/{}_gapfastdvdnet_{:d}.jpeg'.format(savedmatdir, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gaptv/method{:d}/{}_gaptv_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gapffdnet/method{:d}/{}_gapffdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
+                plt.imsave('{}gapfastdvdnet/method{:d}/{}_gapfastdvdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
     
     if SAVE_DATA:
         if not os.path.exists(savedmatdir + 'data/'):
             os.makedirs(savedmatdir + 'data/')
-        filelast_name = "_psnr_method1.csv"
+        filelast_name = "_psnr_method{:d}.csv".format(method_type)
         psnrall_gaptv = np.array(psnrall_gaptv)
         psnrall_gapffdnet = np.array(psnrall_gapffdnet)
         psnrall_gapfastdvdnet = np.array(psnrall_gapfastdvdnet)
