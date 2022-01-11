@@ -33,7 +33,7 @@ resultsdir = './results' # results
 
 # alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 # allnframes = [      -1,         -1,         1,       1,       -1,        -1]
-alldatname = ['runner40']
+alldatname = ['kobe32']
 allnframes = [      -1]
 
 for datname, nframe in zip(alldatname, allnframes):
@@ -87,10 +87,8 @@ for datname, nframe in zip(alldatname, allnframes):
     mask_sum = np.sum(mask, axis=2)
     mask_sum[mask_sum==0] = 1
 
-
     # In[4]:
-
-
+    ######################################################################################
     # [2.3] GAP/ADMM-TV
     ## [2.3.1] GAP-TV
     projmeth = 'gap' # projection method
@@ -115,28 +113,43 @@ for datname, nframe in zip(alldatname, allnframes):
 
 
     # In[6]:
-
+    #################################################################################
+    projmeth = 'gap'
+    method_type = 7
+    tv_initialize = False
 
     import torch
     from packages.ffdnet.models import FFDNet
 
     ## [2.5] GAP/ADMM-FFDNet
     ### [2.5.1] GAP-FFDNet (FFDNet-based frame-wise video denoising)
-    projmeth = 'gap' # projection method
+    # projmeth = 'gap' # projection method
     _lambda = 1 # regularization factor
     accelerate = True # enable accelerated version of GAP
     denoiser = 'ffdnet' # video non-local network 
     noise_estimate = False # disable noise estimation for GAP
-    method_type = 3
+    # method_type = 3
     if method_type == 1:
         sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
         iter_max = [20, 20, 20, 20] # maximum number of iterations
     elif method_type == 2:
-        sigma    = [50*0.97**i for i in range(80)]
+        sigma    = [50*0.97**i/255 for i in range(80)]
         iter_max = [1 for i in range(80)]
-    else:
+    elif method_type == 3:
         sigma    = [12/255]
         iter_max = [80]
+    elif method_type == 4:
+        sigma    = [(50*0.5**(i/30))/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    elif method_type == 5:
+        sigma    = [(50*0.5**(i/40))/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    elif method_type == 6:
+        sigma    = [(50*0.5**(i/50))/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    elif method_type == 7:
+        sigma = [(42/(1 + np.exp((i-30)/10)) + 12)/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
     # sigma    = [12/255, 6/255] # pre-set noise standard deviation
     # iter_max = [10,10] # maximum number of iterations
     useGPU = True # use GPU
@@ -163,7 +176,16 @@ for datname, nframe in zip(alldatname, allnframes):
     model.eval() # evaluation mode
 
     if projmeth.lower() == 'gap':
-        vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
+        if tv_initialize:
+            vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
+                                                projmeth=projmeth, v0=vgaptv, orig=orig,
+                                                iframe=iframe, nframe=nframe,
+                                                MAXB=MAXB, maskdirection='plain',
+                                                _lambda=_lambda, accelerate=accelerate,
+                                                denoiser=denoiser, model=model, 
+                                                iter_max=iter_max, sigma=sigma)
+        else:
+            vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
                                                 projmeth=projmeth, v0=None, orig=orig,
                                                 iframe=iframe, nframe=nframe,
                                                 MAXB=MAXB, maskdirection='plain',
@@ -171,7 +193,16 @@ for datname, nframe in zip(alldatname, allnframes):
                                                 denoiser=denoiser, model=model, 
                                                 iter_max=iter_max, sigma=sigma)
     elif projmeth.lower() == 'admm':
-        vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
+        if tv_initialize:
+            vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
+                                                projmeth=projmeth, v0=vgaptv, orig=orig,
+                                                iframe=iframe, nframe=nframe,
+                                                MAXB=MAXB, maskdirection='plain',
+                                                _lambda=_lambda,
+                                                denoiser=denoiser, model=model, 
+                                                iter_max=iter_max, sigma=sigma)
+        else:
+            vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
                                                 projmeth=projmeth, v0=None, orig=orig,
                                                 iframe=iframe, nframe=nframe,
                                                 MAXB=MAXB, maskdirection='plain',
@@ -186,27 +217,39 @@ for datname, nframe in zip(alldatname, allnframes):
 
 
     # In[7]:
-
+    ###########################################################################
 
     import torch
     from packages.fastdvdnet.models import FastDVDnet
 
     ## [2.2] GAP-FastDVDnet
-    projmeth = 'gap' # projection method
+    # projmeth = 'gap' # projection method
     _lambda = 1 # regularization factor
     accelerate = True # enable accelerated version of GAP
     denoiser = 'fastdvdnet' # video non-local network 
     noise_estimate = False # disable noise estimation for GAP
-    method_type = 3
+    # method_type = 3
     if method_type == 1:
         sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
         iter_max = [20, 20, 20, 20] # maximum number of iterations
     elif method_type == 2:
-        sigma    = [50*0.97**i for i in range(80)]
+        sigma    = [50*0.97**i/255 for i in range(80)]
         iter_max = [1 for i in range(80)]
-    else:
+    elif method_type == 3:
         sigma    = [12/255]
         iter_max = [80]
+    elif method_type == 4:
+        sigma    = [(50*0.5**(i/30))/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    elif method_type == 5:
+        sigma    = [(50*0.5**(i/40))/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    elif method_type == 6:
+        sigma    = [(50*0.5**(i/50))/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    elif method_type == 7:
+        sigma = [(42/(1 + np.exp((i-30)/10)) + 12)/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
     # sigma    = [12/255] # pre-set noise standard deviation
     # iter_max = [20] # maximum number of iterations
     useGPU = True # use GPU
@@ -231,23 +274,42 @@ for datname, nframe in zip(alldatname, allnframes):
     model.eval()
 
     if projmeth.lower() == 'gap':
-        vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
+        if tv_initialize:
+            vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
+                                                projmeth=projmeth, v0=vgaptv, orig=orig,
+                                                iframe=iframe, nframe=nframe,
+                                                MAXB=MAXB, maskdirection='plain',
+                                                _lambda=_lambda, accelerate=accelerate,
+                                                denoiser=denoiser, model=model, 
+                                                iter_max=iter_max, sigma=sigma)
+        else:
+            vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
                                                 projmeth=projmeth, v0=None, orig=orig,
                                                 iframe=iframe, nframe=nframe,
                                                 MAXB=MAXB, maskdirection='plain',
-                                                _lambda=_lambda, accelerate=accelerate, 
+                                                _lambda=_lambda, accelerate=accelerate,
                                                 denoiser=denoiser, model=model, 
                                                 iter_max=iter_max, sigma=sigma)
     elif projmeth.lower() == 'admm':
-        vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
+        if tv_initialize:
+            vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
+                                                projmeth=projmeth, v0=vgaptv, orig=orig,
+                                                iframe=iframe, nframe=nframe,
+                                                MAXB=MAXB, maskdirection='plain',
+                                                _lambda=_lambda,
+                                                denoiser=denoiser, model=model, 
+                                                iter_max=iter_max, sigma=sigma)
+        else:
+            vgapfastdvdnet,tgapfastdvdnet,psnr_gapfastdvdnet,ssim_gapfastdvdnet,psnrall_gapfastdvdnet = admmdenoise_cacti(meas, mask, A, At,
                                                 projmeth=projmeth, v0=None, orig=orig,
                                                 iframe=iframe, nframe=nframe,
                                                 MAXB=MAXB, maskdirection='plain',
-                                                _lambda=_lambda, 
+                                                _lambda=_lambda,
                                                 denoiser=denoiser, model=model, 
                                                 iter_max=iter_max, sigma=sigma)
     else:
         print('Unsupported projection method %s' % projmeth.upper())
+    
     print('{}-{} PSNR {:2.2f} dB, SSIM {:.4f}, running time {:.1f} seconds.'.format(
         projmeth.upper(), denoiser.upper(), mean(psnr_gapfastdvdnet), mean(ssim_gapfastdvdnet), tgapfastdvdnet))
 
@@ -258,7 +320,7 @@ for datname, nframe in zip(alldatname, allnframes):
     
     SAVE_RESULT = True
     SAVE_DATA = True
-    SAVE_MEAS = True
+    SAVE_MEAS = False
 
     savedmatdir = resultsdir + '/savedmat/grayscale/' + alldatname[0] + '/'
     if not os.path.exists(savedmatdir):
@@ -271,30 +333,48 @@ for datname, nframe in zip(alldatname, allnframes):
     if SAVE_RESULT:
         if not os.path.exists(savedmatdir + 'gaptv/'):
             os.makedirs(savedmatdir + 'gaptv/')
-        if not os.path.exists(savedmatdir + 'gapffdnet/'):
-            os.makedirs(savedmatdir + 'gapffdnet/')
-        if not os.path.exists(savedmatdir + 'gapfastdvdnet/'):
-            os.makedirs(savedmatdir + 'gapfastdvdnet/')
-        if not os.path.exists(savedmatdir + 'gaptv/method{:d}/'.format(method_type)):
-            os.makedirs(savedmatdir + 'gaptv/method{:d}/'.format(method_type))
-        if not os.path.exists(savedmatdir + 'gapffdnet/method{:d}/'.format(method_type)):
-            os.makedirs(savedmatdir + 'gapffdnet/method{:d}/'.format(method_type))
-        if not os.path.exists(savedmatdir + 'gapfastdvdnet/method{:d}/'.format(method_type)):
-            os.makedirs(savedmatdir + 'gapfastdvdnet/method{:d}/'.format(method_type))
+        if not os.path.exists(savedmatdir + projmeth + 'ffdnet/'):
+            os.makedirs(savedmatdir + projmeth + 'ffdnet/')
+        if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/'):
+            os.makedirs(savedmatdir + projmeth + 'fastdvdnet/')
+        if tv_initialize:
+            if not os.path.exists(savedmatdir + projmeth + 'ffdnet/method{:d}_tv_initialize/'.format(method_type)):
+                os.makedirs(savedmatdir + projmeth + 'ffdnet/method{:d}_tv_initialize/'.format(method_type))
+            if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}_tv_initialize/'.format(method_type)):
+                os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}_tv_initialize/'.format(method_type))
+        else:
+            if not os.path.exists(savedmatdir + 'gaptv/method{:d}/'.format(method_type)):
+                os.makedirs(savedmatdir + 'gaptv/method{:d}/'.format(method_type))
+            if not os.path.exists(savedmatdir + projmeth + 'ffdnet/method{:d}/'.format(method_type)):
+                os.makedirs(savedmatdir + projmeth + 'ffdnet/method{:d}/'.format(method_type))
+            if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}/'.format(method_type)):
+                os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}/'.format(method_type))
         for i in range(orig.shape[2]):
-            if i < 10:
-                plt.imsave('{}gaptv/method{:d}/{}_gaptv_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapffdnet/method{:d}/{}_gapffdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapfastdvdnet/method{:d}/{}_gapfastdvdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+            if tv_initialize:
+                iter_max = 5
+                if i < 10:
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}_tv_initialize/{}_{projmeth}ffdnet_tv_initialize{:d}_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], iter_max, i, projmeth=projmeth), vgapffdnet[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}_tv_initialize/{}_{projmeth}fastdvdnet_tv_initialize{:d}_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], iter_max, i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+                else:
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}_tv_initialize/{}_{projmeth}ffdnet_tv_initialize{:d}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], iter_max, i, projmeth=projmeth), vgapffdnet[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}_tv_initialize/{}_{projmeth}fastdvdnet_tv_initialize{:d}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], iter_max, i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
             else:
-                plt.imsave('{}gaptv/method{:d}/{}_gaptv_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapffdnet/method{:d}/{}_gapffdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapfastdvdnet/method{:d}/{}_gapfastdvdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+                if i < 10:
+                    plt.imsave('{}gaptv/method{:d}/{}_gaptv_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}/{}_{projmeth}ffdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth), vgapffdnet[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}/{}_{projmeth}fastdvdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+                else:
+                    plt.imsave('{}gaptv/method{:d}/{}_gaptv_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}/{}_{projmeth}ffdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth), vgapffdnet[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}/{}_{projmeth}fastdvdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
     
     if SAVE_DATA:
         if not os.path.exists(savedmatdir + 'data/'):
             os.makedirs(savedmatdir + 'data/')
-        filelast_name = "_psnr_method{:d}.csv".format(method_type)
+        if tv_initialize:
+            filelast_name = "_psnr_method{:d}_tv_initialize{:d}.csv".format(method_type, iter_max)
+        else:
+            filelast_name = "_psnr_method{:d}.csv".format(method_type)
         psnrall_gaptv = np.array(psnrall_gaptv)
         psnrall_gapffdnet = np.array(psnrall_gapffdnet)
         psnrall_gapfastdvdnet = np.array(psnrall_gapfastdvdnet)
@@ -302,8 +382,8 @@ for datname, nframe in zip(alldatname, allnframes):
         psnrmean_gapffdnet = psnrall_gapffdnet.mean(axis=0)
         psnrmean_gapfastdvdnet = psnrall_gapfastdvdnet.mean(axis=0)
         gaptv_path = savedmatdir + 'data/' + "gaptv" + filelast_name
-        ffdnet_path = savedmatdir + 'data/' + "gapffdnet" + filelast_name
-        fastdvdnet_path = savedmatdir + 'data/' + "gapfastdvdnet" + filelast_name
+        ffdnet_path = savedmatdir + 'data/' + projmeth + "ffdnet" + filelast_name
+        fastdvdnet_path = savedmatdir + 'data/' + projmeth + "fastdvdnet" + filelast_name
         np.savetxt(gaptv_path, psnrmean_gaptv)
         np.savetxt(ffdnet_path, psnrmean_gapffdnet)
         np.savetxt(fastdvdnet_path, psnrmean_gapfastdvdnet)

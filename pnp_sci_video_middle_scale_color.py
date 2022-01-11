@@ -44,6 +44,7 @@ for ncount in range(1):
 #datname = 'Traffic_bayer'
 # datname = 'Runner_bayer'
 # datname = 'Bosphorus_bayer'
+    ncount = 2
     if ncount == 0:
         datname = 'Bosphorus_bayer'
     elif ncount == 1:
@@ -103,25 +104,25 @@ for ncount in range(1):
     psnr_gaptv = np.zeros([nmask*nmea,1], dtype=np.float32)
     ssim_gaptv = np.zeros([nmask*nmea,1], dtype=np.float32)
     
-    vgapffdgray_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
-    psnr_gapffdgray = np.zeros([nmask*nmea,1], dtype=np.float32)
-    ssim_gapffdgray = np.zeros([nmask*nmea,1], dtype=np.float32)
+    # vgapffdgray_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
+    # psnr_gapffdgray = np.zeros([nmask*nmea,1], dtype=np.float32)
+    # ssim_gapffdgray = np.zeros([nmask*nmea,1], dtype=np.float32)
     
-    vgap_ffd_color_down_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
-    psnr_gapffd_color_down = np.zeros([nmask*nmea,1], dtype=np.float32)
-    ssim_gapffd_color_down = np.zeros([nmask*nmea,1], dtype=np.float32)
+    # vgap_ffd_color_down_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
+    # psnr_gapffd_color_down = np.zeros([nmask*nmea,1], dtype=np.float32)
+    # ssim_gapffd_color_down = np.zeros([nmask*nmea,1], dtype=np.float32)
     
     vgap_ffd_color_demosaic_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
     psnr_gapffd_color_demosaic = np.zeros([nmask*nmea,1], dtype=np.float32)
     ssim_gapffd_color_demosaic = np.zeros([nmask*nmea,1], dtype=np.float32)
     
-    vgap_fastdvd_gray_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
-    psnr_fastdvd_gray = np.zeros([nmask*nmea,1], dtype=np.float32)
-    ssim_fastdvd_gray = np.zeros([nmask*nmea,1], dtype=np.float32)
+    # vgap_fastdvd_gray_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
+    # psnr_fastdvd_gray = np.zeros([nmask*nmea,1], dtype=np.float32)
+    # ssim_fastdvd_gray = np.zeros([nmask*nmea,1], dtype=np.float32)
     
-    vgap_fastdvd_color_down_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
-    psnr_fastdvd_color_down = np.zeros([nmask*nmea,1], dtype=np.float32)
-    ssim_fastdvd_color_down = np.zeros([nmask*nmea,1], dtype=np.float32)
+    # vgap_fastdvd_color_down_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
+    # psnr_fastdvd_color_down = np.zeros([nmask*nmea,1], dtype=np.float32)
+    # ssim_fastdvd_color_down = np.zeros([nmask*nmea,1], dtype=np.float32)
     
     vgap_fastdvd_color_demosaic_bayer = np.zeros([nrows, ncols, nmask*nmea], dtype=np.float32)
     psnr_fastdvd_color_demosaic = np.zeros([nmask*nmea,1], dtype=np.float32)
@@ -148,7 +149,7 @@ for ncount in range(1):
         tv_weight = 0.1 # TV denoising weight (larger for smoother but slower)
         tv_iter_max = 5 # TV denoising maximum number of iterations each
         begin_time = time.time()
-        vgaptv_bayer_t,psnr_gaptv_t,ssim_gaptv_t,psnrall_tv =             gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
+        vgaptv_bayer_t,psnr_gaptv_t,ssim_gaptv_t,psnrall_tv = gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
                                       accelerate, denoiser, iter_max, 
                                       tv_weight=tv_weight, 
                                       tv_iter_max=tv_iter_max,
@@ -161,132 +162,150 @@ for ncount in range(1):
         psnr_gaptv[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gaptv_t,(nmask,1))
         ssim_gaptv[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gaptv_t,(nmask,1))
         
+        ###########################################################################################################
+        projmeth = 'gap'
+        method_type = 1
+        tv_initialize = False
+
+        # # In[9]:    
+        # import torch
+        # from packages.ffdnet.models import FFDNet
         
-        # In[9]:    
-        import torch
-        from packages.ffdnet.models import FFDNet
+        # ## [2.5] GAP/ADMM-FFDNet
+        # ### [2.5.1] GAP-FFDNet (FFDNet-based frame-wise video denoising)
+        # _lambda = 1 # regularization factor
+        # accelerate = True # enable accelerated version of GAP
+        # denoiser = 'ffdnet' # video non-local network 
+        # noise_estimate = False # disable noise estimation for GAP
+        # # sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
+        # # iter_max = [20,20,20,10] # maximum number of iterations
+        # # sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
+        # # iter_max = [10,10,10,10] # maximum number of iterations
+        # if method_type == 1:
+        #     sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
+        #     iter_max = [20, 20, 20, 20] # maximum number of iterations
+        # elif method_type == 2:
+        #     sigma    = [50*0.97**i/255 for i in range(80)]
+        #     iter_max = [1 for i in range(80)]
+        # else:
+        #     sigma    = [12/255]
+        #     iter_max = [80]
+        # useGPU = True # use GPU
         
-        ## [2.5] GAP/ADMM-FFDNet
-        ### [2.5.1] GAP-FFDNet (FFDNet-based frame-wise video denoising)
-        _lambda = 1 # regularization factor
-        accelerate = True # enable accelerated version of GAP
-        denoiser = 'ffdnet' # video non-local network 
-        noise_estimate = False # disable noise estimation for GAP
-        # sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
-        # iter_max = [20,20,20,10] # maximum number of iterations
-        # sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
-        # iter_max = [10,10,10,10] # maximum number of iterations
-        sigma    = [50/255,25/255, 12/255, 6/255] # pre-set noise standard deviation
-        iter_max = [20,20,20,20] # maximum number of iterations
-        useGPU = True # use GPU
+        # # pre-load the model for FFDNet image denoising
+        # in_ch = 1
+        # model_fn = 'packages/ffdnet/models/net_gray.pth'
+        # # Absolute path to model file
+        # # model_fn = os.path.join(os.path.abspath(os.path.dirname(__file__)), model_fn)
         
-        # pre-load the model for FFDNet image denoising
-        in_ch = 1
-        model_fn = 'packages/ffdnet/models/net_gray.pth'
-        # Absolute path to model file
-        # model_fn = os.path.join(os.path.abspath(os.path.dirname(__file__)), model_fn)
+        # # Create model
+        # net = FFDNet(num_input_channels=in_ch)
+        # # Load saved weights
+        # if useGPU:
+        #     state_dict = torch.load(model_fn)
+        #     device_ids = [0]
+        #     model = torch.nn.DataParallel(net, device_ids=device_ids).cuda()
+        # else:
+        #     state_dict = torch.load(model_fn, map_location='cpu')
+        #     # CPU mode: remove the DataParallel wrapper
+        #     state_dict = remove_dataparallel_wrapper(state_dict)
+        #     model = net
+        # model.load_state_dict(state_dict)
+        # model.eval() # evaluation mode
         
-        # Create model
-        net = FFDNet(num_input_channels=in_ch)
-        # Load saved weights
-        if useGPU:
-            state_dict = torch.load(model_fn)
-            device_ids = [0]
-            model = torch.nn.DataParallel(net, device_ids=device_ids).cuda()
-        else:
-            state_dict = torch.load(model_fn, map_location='cpu')
-            # CPU mode: remove the DataParallel wrapper
-            state_dict = remove_dataparallel_wrapper(state_dict)
-            model = net
-        model.load_state_dict(state_dict)
-        model.eval() # evaluation mode
+        # begin_time = time.time()
+        # vgapffdnet_bayer_t,psnr_gapffdnet_t,ssim_gapffdnet_t,psnrall_ffdnet = gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
+        #                                   accelerate, denoiser, iter_max, 
+        #                                   noise_estimate, sigma,
+        #                                   x0_bayer=None,
+        #                                   X_orig=orig_bayer_t,
+        #                                   model=model)
+        # end_time = time.time()
+        # tgapffdnet = end_time - begin_time
+        # print('GAP-{} PSNR {:2.2f} dB, SSIM {:.4f} running time {:.1f} seconds.'.format(
+        #     denoiser.upper(), mean(psnr_gapffdnet_t), mean(ssim_gapffdnet_t), tgapffdnet))
+        # vgapffdgray_bayer[:,:,iframe*nmask:(iframe+1)*nmask] =  vgapffdnet_bayer_t
+        # psnr_gapffdgray[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapffdnet_t,(nmask,1))
+        # ssim_gapffdgray[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapffdnet_t,(nmask,1))
         
-        begin_time = time.time()
-        vgapffdnet_bayer_t,psnr_gapffdnet_t,ssim_gapffdnet_t,psnrall_ffdnet =                 gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
-                                          accelerate, denoiser, iter_max, 
-                                          noise_estimate, sigma,
-                                          x0_bayer=None,
-                                          X_orig=orig_bayer_t,
-                                          model=model)
-        end_time = time.time()
-        tgapffdnet = end_time - begin_time
-        print('GAP-{} PSNR {:2.2f} dB, SSIM {:.4f} running time {:.1f} seconds.'.format(
-            denoiser.upper(), mean(psnr_gapffdnet_t), mean(ssim_gapffdnet_t), tgapffdnet))
-        vgapffdgray_bayer[:,:,iframe*nmask:(iframe+1)*nmask] =  vgapffdnet_bayer_t
-        psnr_gapffdgray[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapffdnet_t,(nmask,1))
-        ssim_gapffdgray[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapffdnet_t,(nmask,1))
-        
-        # In[10]:
+        # # In[10]:
         
         
-        import torch
-        from packages.ffdnet.models import FFDNet
+        # import torch
+        # from packages.ffdnet.models import FFDNet
         
-        ## [2.5] GAP/ADMM-FFDNet
-        ### [2.5.1] GAP-FFDNet (FFDNet-based frame-wise video denoising)
-        _lambda = 1 # regularization factor
-        accelerate = True # enable accelerated version of GAP
-        denoiser = 'ffdnet_color_down' # video non-local network 
-        noise_estimate = False # disable noise estimation for GAP
-        # sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
-        # iter_max = [20,20,20,10] # maximum number of iterations
-        # sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
-        # iter_max = [10,10,10,10] # maximum number of iterations
-        sigma    = [50/255,25/255,12/255,6/255] # pre-set noise standard deviation
-        iter_max = [20,20,20,10] # maximum number of iterations
-        useGPU = True # use GPU
+        # ## [2.5] GAP/ADMM-FFDNet
+        # ### [2.5.1] GAP-FFDNet (FFDNet-based frame-wise video denoising)
+        # _lambda = 1 # regularization factor
+        # accelerate = True # enable accelerated version of GAP
+        # denoiser = 'ffdnet_color_down' # video non-local network 
+        # noise_estimate = False # disable noise estimation for GAP
+        # # sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
+        # # iter_max = [20,20,20,10] # maximum number of iterations
+        # # sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
+        # # iter_max = [10,10,10,10] # maximum number of iterations
+        # if method_type == 1:
+        #     sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
+        #     iter_max = [20, 20, 20, 20] # maximum number of iterations
+        # elif method_type == 2:
+        #     sigma    = [50*0.97**i/255 for i in range(80)]
+        #     iter_max = [1 for i in range(80)]
+        # else:
+        #     sigma    = [12/255]
+        #     iter_max = [80]
+        # useGPU = True # use GPU
         
-        # pre-load the model for FFDNet image denoising
-        model_name = 'ffdnet_color'           # 'ffdnet_gray' | 'ffdnet_color' | 'ffdnet_color_clip' | 'ffdnet_gray_clip'
+        # # pre-load the model for FFDNet image denoising
+        # model_name = 'ffdnet_color'           # 'ffdnet_gray' | 'ffdnet_color' | 'ffdnet_color_clip' | 'ffdnet_gray_clip'
           
-            #sf = 1                    # unused for denoising
-        if 'color' in model_name:
-                n_channels = 3        # setting for color image
-                nc = 96               # setting for color image
-                nb = 12               # setting for color image
-        else:
-                n_channels = 1        # setting for grayscale image
-                nc = 64               # setting for grayscale image
-                nb = 15               # setting for grayscale image
+        #     #sf = 1                    # unused for denoising
+        # if 'color' in model_name:
+        #         n_channels = 3        # setting for color image
+        #         nc = 96               # setting for color image
+        #         nb = 12               # setting for color image
+        # else:
+        #         n_channels = 1        # setting for grayscale image
+        #         nc = 64               # setting for grayscale image
+        #         nb = 15               # setting for grayscale image
             
-        model_pool = 'packages/ffdnet/models'  # fixed
-        model_path = os.path.join(model_pool, model_name+'.pth')
-            #model_path = os.path.join(model_pool, model_name+'.pth')
+        # model_pool = 'packages/ffdnet/models'  # fixed
+        # model_path = os.path.join(model_pool, model_name+'.pth')
+        #     #model_path = os.path.join(model_pool, model_name+'.pth')
         
-            # ----------------------------------------
+        #     # ----------------------------------------
           
-            #need_H = True if H_path is not None else False
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        #     #need_H = True if H_path is not None else False
+        # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
          
         
-            # ----------------------------------------
-            # load model
-            # ----------------------------------------
+        #     # ----------------------------------------
+        #     # load model
+        #     # ----------------------------------------
         
-            #from packages.ffdnet.models.network_ffdnet import FFDNet as net
-        from packages.ffdnet.network_ffdnet import FFDNet as net
-        model = net(in_nc=n_channels, out_nc=n_channels, nc=nc, nb=nb, act_mode='R')
-        model.load_state_dict(torch.load(model_path), strict=True)
-        model.eval()
-        for k, v in model.named_parameters():
-                v.requires_grad = False
-        model = model.to(device)
+        #     #from packages.ffdnet.models.network_ffdnet import FFDNet as net
+        # from packages.ffdnet.network_ffdnet import FFDNet as net
+        # model = net(in_nc=n_channels, out_nc=n_channels, nc=nc, nb=nb, act_mode='R')
+        # model.load_state_dict(torch.load(model_path), strict=True)
+        # model.eval()
+        # for k, v in model.named_parameters():
+        #         v.requires_grad = False
+        # model = model.to(device)
             
         
-        begin_time = time.time()
-        vgapffdnet_color_down_bayer_t,psnr_gapffdnet_color_down_t,ssim_gapffdnet_color_down_t,psnrall_ffdnet_color_down =                 gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
-                                          accelerate, denoiser, iter_max, 
-                                          noise_estimate, sigma,
-                                          x0_bayer=vgaptv_bayer_t,
-                                          X_orig=orig_bayer_t,
-                                          model=model)
-        end_time = time.time()
-        tgapffdnet_color_down = end_time - begin_time
-        print('GAP-{} PSNR {:2.2f} dB, SSIM {:.4f} running time {:.1f} seconds.'.format(
-            denoiser.upper(), mean(psnr_gapffdnet_color_down_t), mean(ssim_gapffdnet_color_down_t), tgapffdnet_color_down))
-        vgap_ffd_color_down_bayer[:,:,iframe*nmask:(iframe+1)*nmask] =  vgapffdnet_color_down_bayer_t
-        psnr_gapffd_color_down[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapffdnet_color_down_t,(nmask,1))
-        ssim_gapffd_color_down[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapffdnet_color_down_t,(nmask,1))
+        # begin_time = time.time()
+        # vgapffdnet_color_down_bayer_t,psnr_gapffdnet_color_down_t,ssim_gapffdnet_color_down_t,psnrall_ffdnet_color_down = gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
+        #                                   accelerate, denoiser, iter_max, 
+        #                                   noise_estimate, sigma,
+        #                                   x0_bayer=vgaptv_bayer_t,
+        #                                   X_orig=orig_bayer_t,
+        #                                   model=model)
+        # end_time = time.time()
+        # tgapffdnet_color_down = end_time - begin_time
+        # print('GAP-{} PSNR {:2.2f} dB, SSIM {:.4f} running time {:.1f} seconds.'.format(
+        #     denoiser.upper(), mean(psnr_gapffdnet_color_down_t), mean(ssim_gapffdnet_color_down_t), tgapffdnet_color_down))
+        # vgap_ffd_color_down_bayer[:,:,iframe*nmask:(iframe+1)*nmask] =  vgapffdnet_color_down_bayer_t
+        # psnr_gapffd_color_down[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapffdnet_color_down_t,(nmask,1))
+        # ssim_gapffd_color_down[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapffdnet_color_down_t,(nmask,1))
         
         # In[11]:
         
@@ -306,8 +325,15 @@ for ncount in range(1):
         # iter_max = [10,10,10,10] # maximum number of iterations
         #sigma    = [50/255,25/255,12/255,6/255] # pre-set noise standard deviation
         #iter_max = [20,20,20,10] # maximum number of iterations
-        sigma    = [50/255,25/255,12/255,6/255] # pre-set noise standard deviation
-        iter_max = [20,20,20,10] # maximum number of iterations
+        if method_type == 1:
+            sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
+            iter_max = [20, 20, 20, 20] # maximum number of iterations
+        elif method_type == 2:
+            sigma    = [50*0.97**i/255 for i in range(80)]
+            iter_max = [1 for i in range(80)]
+        else:
+            sigma    = [12/255]
+            iter_max = [80]
         useGPU = True # use GPU
         
         # pre-load the model for FFDNet image denoising
@@ -348,7 +374,7 @@ for ncount in range(1):
             
         
         begin_time = time.time()
-        vgapffdnet_color_demosaic_bayer_t,psnr_gapffdnet_color_demosaic_t,ssim_gapffdnet_color_demosaic_t,psnrall_ffdnet_color =                 gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
+        vgapffdnet_color_demosaic_bayer_t,psnr_gapffdnet_color_demosaic_t,ssim_gapffdnet_color_demosaic_t,psnrall_ffdnet_color = gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
                                           accelerate, denoiser, iter_max, 
                                           noise_estimate, sigma,
                                           x0_bayer=vgaptv_bayer_t,
@@ -362,108 +388,123 @@ for ncount in range(1):
         psnr_gapffd_color_demosaic[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapffdnet_color_demosaic_t,(nmask,1))
         ssim_gapffd_color_demosaic[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapffdnet_color_demosaic_t,(nmask,1))
     
+        # # In[11]:
+
+        # import torch
+        # from packages.fastdvdnet.models import FastDVDnet
         
-        # In[11]:
+        # ## [2.2] GAP-FastDVDnet
+        # _lambda = 1 # regularization factor
+        # accelerate = True # enable accelerated version of GAP
+        # denoiser = 'fastdvdnet_gray' # video non-local network 
+        # noise_estimate = False # disable noise estimation for GAP
+        # # sigma    = [50/255, 25/255, 12/255, 6/255, 3/255] # pre-set noise standard deviation
+        # # iter_max = [10, 10, 10, 10, 10] # maximum number of iterations
+        # # method_type = 3
+        # if method_type == 1:
+        #     sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
+        #     iter_max = [20, 20, 20, 20] # maximum number of iterations
+        # elif method_type == 2:
+        #     sigma    = [50*0.97**i/255 for i in range(80)]
+        #     iter_max = [1 for i in range(80)]
+        # else:
+        #     sigma    = [12/255]
+        #     iter_max = [80]
+        # # sigma    = [50/255,25/255] # pre-set noise standard deviation
+        # # iter_max = [10,10] # maximum number of iterations
+        # useGPU = True # use GPU
         
-        import torch
-        from packages.fastdvdnet.models import FastDVDnet
-        
-        ## [2.2] GAP-FastDVDnet
-        _lambda = 1 # regularization factor
-        accelerate = True # enable accelerated version of GAP
-        denoiser = 'fastdvdnet_gray' # video non-local network 
-        noise_estimate = False # disable noise estimation for GAP
-        # sigma    = [50/255, 25/255, 12/255, 6/255, 3/255] # pre-set noise standard deviation
-        # iter_max = [10, 10, 10, 10, 10] # maximum number of iterations
-        sigma    = [50/255, 25/255, 12/255] # pre-set noise standard deviation
-        iter_max = [20, 20, 20] # maximum number of iterations
-        # sigma    = [50/255,25/255] # pre-set noise standard deviation
-        # iter_max = [10,10] # maximum number of iterations
-        useGPU = True # use GPU
-        
-        # pre-load the model for FFDNet image denoising
-        NUM_IN_FR_EXT = 5 # temporal size of patch
-        model = FastDVDnet(num_input_frames=NUM_IN_FR_EXT,num_color_channels=1)
+        # # pre-load the model for FFDNet image denoising
+        # NUM_IN_FR_EXT = 5 # temporal size of patch
+        # model = FastDVDnet(num_input_frames=NUM_IN_FR_EXT,num_color_channels=1)
     
         
-        # Load saved weights
-        state_temp_dict = torch.load('./packages/fastdvdnet/model_gray.pth')
-        if useGPU:
-            device_ids = [0]
-            #model = torch.nn.DataParallel(model, device_ids=device_ids).cuda()
-            model = model.cuda()
-        else:
-            # CPU mode: remove the DataParallel wrapper
-            state_temp_dict = remove_dataparallel_wrapper(state_temp_dict)
-        model.load_state_dict(state_temp_dict)
+        # # Load saved weights
+        # state_temp_dict = torch.load('./packages/fastdvdnet/model_gray.pth')
+        # if useGPU:
+        #     device_ids = [0]
+        #     #model = torch.nn.DataParallel(model, device_ids=device_ids).cuda()
+        #     model = model.cuda()
+        # else:
+        #     # CPU mode: remove the DataParallel wrapper
+        #     state_temp_dict = remove_dataparallel_wrapper(state_temp_dict)
+        # model.load_state_dict(state_temp_dict)
         
-        # Sets the model in evaluation mode (e.g. it removes BN)
-        model.eval()
+        # # Sets the model in evaluation mode (e.g. it removes BN)
+        # model.eval()
         
-        begin_time = time.time()
-        vgapfastdvdnet_gray_bayer_t,psnr_gapfastdvdnet_gray_t,ssim_gapfastdvdnet_gray_t,psnrall_fastdvdnet_gray_t =                 gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
-                                          accelerate, denoiser, iter_max, 
-                                          noise_estimate, sigma,
-                                          x0_bayer=vgaptv_bayer_t,
-                                          X_orig=orig_bayer_t,
-                                          model=model)
-        end_time = time.time()
-        tgapfastdvdnet_gray = end_time - begin_time
-        print('GAP-{} PSNR {:2.2f} dB, SSIM {:.4f}, running time {:.1f} seconds.'.format(
-            denoiser.upper(), mean(psnr_gapfastdvdnet_gray_t), mean(ssim_gapfastdvdnet_gray_t), tgapfastdvdnet_gray))
+        # begin_time = time.time()
+        # vgapfastdvdnet_gray_bayer_t,psnr_gapfastdvdnet_gray_t,ssim_gapfastdvdnet_gray_t,psnrall_fastdvdnet_gray_t = gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
+        #                                   accelerate, denoiser, iter_max, 
+        #                                   noise_estimate, sigma,
+        #                                   x0_bayer=vgaptv_bayer_t,
+        #                                   X_orig=orig_bayer_t,
+        #                                   model=model)
+        # end_time = time.time()
+        # tgapfastdvdnet_gray = end_time - begin_time
+        # print('GAP-{} PSNR {:2.2f} dB, SSIM {:.4f}, running time {:.1f} seconds.'.format(
+        #     denoiser.upper(), mean(psnr_gapfastdvdnet_gray_t), mean(ssim_gapfastdvdnet_gray_t), tgapfastdvdnet_gray))
     
-        vgap_fastdvd_gray_bayer[:,:,iframe*nmask:(iframe+1)*nmask] =  vgapfastdvdnet_gray_bayer_t
-        psnr_fastdvd_gray[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapfastdvdnet_gray_t,(nmask,1))
-        ssim_fastdvd_gray[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapfastdvdnet_gray_t,(nmask,1))
-        # In[12]:
-        import torch
-        from packages.fastdvdnet.models import FastDVDnet
+        # vgap_fastdvd_gray_bayer[:,:,iframe*nmask:(iframe+1)*nmask] =  vgapfastdvdnet_gray_bayer_t
+        # psnr_fastdvd_gray[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapfastdvdnet_gray_t,(nmask,1))
+        # ssim_fastdvd_gray[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapfastdvdnet_gray_t,(nmask,1))
+        # # In[12]:
+        # import torch
+        # from packages.fastdvdnet.models import FastDVDnet
         
-        ## [2.2] GAP-FastDVDnet
-        _lambda = 1 # regularization factor
-        accelerate = True # enable accelerated version of GAP
-        denoiser = 'fastdvdnet_down' # video non-local network 
-        noise_estimate = False # disable noise estimation for GAP
-        # sigma    = [50/255, 25/255, 12/255, 6/255, 3/255] # pre-set noise standard deviation
-        # iter_max = [10, 10, 10, 10, 10] # maximum number of iterations
-        sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
-        iter_max = [20, 20, 20, 20] # maximum number of iterations
-        # sigma    = [50/255,25/255] # pre-set noise standard deviation
-        # iter_max = [10,10] # maximum number of iterations
-        useGPU = True # use GPU
+        # ## [2.2] GAP-FastDVDnet
+        # _lambda = 1 # regularization factor
+        # accelerate = True # enable accelerated version of GAP
+        # denoiser = 'fastdvdnet_down' # video non-local network 
+        # noise_estimate = False # disable noise estimation for GAP
+        # # sigma    = [50/255, 25/255, 12/255, 6/255, 3/255] # pre-set noise standard deviation
+        # # iter_max = [10, 10, 10, 10, 10] # maximum number of iterations
+        # # method_type = 3
+        # if method_type == 1:
+        #     sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
+        #     iter_max = [20, 20, 20, 20] # maximum number of iterations
+        # elif method_type == 2:
+        #     sigma    = [50*0.97**i/255 for i in range(80)]
+        #     iter_max = [1 for i in range(80)]
+        # else:
+        #     sigma    = [12/255]
+        #     iter_max = [80]
+        # # sigma    = [50/255,25/255] # pre-set noise standard deviation
+        # # iter_max = [10,10] # maximum number of iterations
+        # useGPU = True # use GPU
         
-        # pre-load the model for FFDNet image denoising
-        NUM_IN_FR_EXT = 5 # temporal size of patch
-        model = FastDVDnet(num_input_frames=NUM_IN_FR_EXT)
+        # # pre-load the model for FFDNet image denoising
+        # NUM_IN_FR_EXT = 5 # temporal size of patch
+        # model = FastDVDnet(num_input_frames=NUM_IN_FR_EXT)
         
-        # Load saved weights
-        state_temp_dict = torch.load('./packages/fastdvdnet/model.pth')
-        if useGPU:
-            device_ids = [0]
-            model = torch.nn.DataParallel(model, device_ids=device_ids).cuda()
-        else:
-            # CPU mode: remove the DataParallel wrapper
-            state_temp_dict = remove_dataparallel_wrapper(state_temp_dict)
-        model.load_state_dict(state_temp_dict)
+        # # Load saved weights
+        # state_temp_dict = torch.load('./packages/fastdvdnet/model.pth')
+        # if useGPU:
+        #     device_ids = [0]
+        #     model = torch.nn.DataParallel(model, device_ids=device_ids).cuda()
+        # else:
+        #     # CPU mode: remove the DataParallel wrapper
+        #     state_temp_dict = remove_dataparallel_wrapper(state_temp_dict)
+        # model.load_state_dict(state_temp_dict)
         
-        # Sets the model in evaluation mode (e.g. it removes BN)
-        model.eval()
+        # # Sets the model in evaluation mode (e.g. it removes BN)
+        # model.eval()
         
-        begin_time = time.time()
-        vgapfastdvdnet_bayer_t,psnr_gapfastdvdnet_t,ssim_gapfastdvdnet_t,psnrall_fastdvdnet_t =                 gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
-                                          accelerate, denoiser, iter_max, 
-                                          noise_estimate, sigma,
-                                          x0_bayer=vgaptv_bayer_t,
-                                          X_orig=orig_bayer_t,
-                                          model=model)
-        end_time = time.time()
-        tgapfastdvdnet_down = end_time - begin_time
-        print('GAP-{} PSNR {:2.2f} dB, SSIM {:.4f}, running time {:.1f} seconds.'.format(
-            denoiser.upper(), mean(psnr_gapfastdvdnet_t), mean(ssim_gapfastdvdnet_t), tgapfastdvdnet_down))
+        # begin_time = time.time()
+        # vgapfastdvdnet_bayer_t,psnr_gapfastdvdnet_t,ssim_gapfastdvdnet_t,psnrall_fastdvdnet_t = gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
+        #                                   accelerate, denoiser, iter_max, 
+        #                                   noise_estimate, sigma,
+        #                                   x0_bayer=vgaptv_bayer_t,
+        #                                   X_orig=orig_bayer_t,
+        #                                   model=model)
+        # end_time = time.time()
+        # tgapfastdvdnet_down = end_time - begin_time
+        # print('GAP-{} PSNR {:2.2f} dB, SSIM {:.4f}, running time {:.1f} seconds.'.format(
+        #     denoiser.upper(), mean(psnr_gapfastdvdnet_t), mean(ssim_gapfastdvdnet_t), tgapfastdvdnet_down))
     
-        vgap_fastdvd_color_down_bayer[:,:,iframe*nmask:(iframe+1)*nmask] =  vgapfastdvdnet_bayer_t
-        psnr_fastdvd_color_down[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapfastdvdnet_t,(nmask,1))
-        ssim_fastdvd_color_down[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapfastdvdnet_t,(nmask,1))
+        # vgap_fastdvd_color_down_bayer[:,:,iframe*nmask:(iframe+1)*nmask] =  vgapfastdvdnet_bayer_t
+        # psnr_fastdvd_color_down[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(psnr_gapfastdvdnet_t,(nmask,1))
+        # ssim_fastdvd_color_down[iframe*nmask:(iframe+1)*nmask,:] = np.reshape(ssim_gapfastdvdnet_t,(nmask,1))
     
         # In[13]:
         import torch
@@ -476,8 +517,16 @@ for ncount in range(1):
         noise_estimate = False # disable noise estimation for GAP
         # sigma    = [50/255, 25/255, 12/255, 6/255, 3/255] # pre-set noise standard deviation
         # iter_max = [10, 10, 10, 10, 10] # maximum number of iterations
-        sigma    = [50/255, 25/255, 12/255, 6/255] # pre-set noise standard deviation
-        iter_max = [20, 20, 20, 20] # maximum number of iterations
+        # method_type = 3
+        if method_type == 1:
+            sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
+            iter_max = [20, 20, 20, 20] # maximum number of iterations
+        elif method_type == 2:
+            sigma    = [50*0.97**i/255 for i in range(80)]
+            iter_max = [1 for i in range(80)]
+        else:
+            sigma    = [12/255]
+            iter_max = [80]
         # sigma    = [50/255,25/255] # pre-set noise standard deviation
         # iter_max = [10,10] # maximum number of iterations
         useGPU = True # use GPU
@@ -500,7 +549,7 @@ for ncount in range(1):
         model.eval()
         
         begin_time = time.time()
-        vgapfastdvdnet_demosaic_bayer_t,psnr_gapfastdvdnet_demosaic_t,ssim_gapfastdvdnet_demosaic_t,psnrall_fastdvdnet_demosaic_t =                 gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
+        vgapfastdvdnet_demosaic_bayer_t,psnr_gapfastdvdnet_demosaic_t,ssim_gapfastdvdnet_demosaic_t,psnrall_fastdvdnet_demosaic_t = gap_denoise_bayer(meas_bayer_t, mask_bayer, _lambda, 
                                           accelerate, denoiser, iter_max, 
                                           noise_estimate, sigma,
                                           x0_bayer=vgaptv_bayer_t,
@@ -518,58 +567,74 @@ for ncount in range(1):
         
     # In[8]:
     # [3.3] result demonstration of GAP-Denoise
-    
-    nmask = mask.shape[2]
-    
-    SAVE_RESULT = False
-    SAVE_DATA = True
-    SAVE_MEAS = False
 
-    savedmatdir = resultsdir + '/savedmat/color/' + alldatname[0] + '/'
+    print(vgap_fastdvd_color_demosaic_bayer.shape)
+
+    SAVE_RESULT = True
+    SAVE_DATA = True
+    SAVE_MEAS = True
+
+    savedmatdir = resultsdir + '/savedmat/color/' + datname + '/'
     if not os.path.exists(savedmatdir):
         os.makedirs(savedmatdir)
     
-    psnrall_gapffdnet = np.array(psnrall_gapffdnet)
-    psnrmean_gapffdnet = psnrall_gapffdnet.mean(axis=0)
-    print()
     # sio.savemat('{}gap{}_{}{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask),
     #             {'vgapdenoise':vgapdenoise},{'psnr_gapdenoise':psnr_gapdenoise})
     if SAVE_RESULT:
         if not os.path.exists(savedmatdir + 'gaptv/'):
             os.makedirs(savedmatdir + 'gaptv/')
-        if not os.path.exists(savedmatdir + 'gapffdnet/'):
-            os.makedirs(savedmatdir + 'gapffdnet/')
-        if not os.path.exists(savedmatdir + 'gapfastdvdnet/'):
-            os.makedirs(savedmatdir + 'gapfastdvdnet/')
-        if not os.path.exists(savedmatdir + 'gaptv/method{:d}/'.format(method_type)):
-            os.makedirs(savedmatdir + 'gaptv/method{:d}/'.format(method_type)')
-        if not os.path.exists(savedmatdir + 'gapffdnet/method{:d}/'.format(method_type)'):
-            os.makedirs(savedmatdir + 'gapffdnet/method{:d}/'.format(method_type)')
-        if not os.path.exists(savedmatdir + 'gapfastdvdnet/method{:d}/'.format(method_type)'):
-            os.makedirs(savedmatdir + 'gapfastdvdnet/method{:d}/'.format(method_type)')
+        if not os.path.exists(savedmatdir + projmeth + 'ffdnet/'):
+            os.makedirs(savedmatdir + projmeth + 'ffdnet/')
+        if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/'):
+            os.makedirs(savedmatdir + projmeth + 'fastdvdnet/')
+        if tv_initialize:
+            if not os.path.exists(savedmatdir + projmeth + 'ffdnet/method{:d}_tv_initialize/'.format(method_type)):
+                os.makedirs(savedmatdir + projmeth + 'ffdnet/method{:d}_tv_initialize/'.format(method_type))
+            if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}_tv_initialize/'.format(method_type)):
+                os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}_tv_initialize/'.format(method_type))
+        else:
+            if not os.path.exists(savedmatdir + 'gaptv/method{:d}/'.format(method_type)):
+                os.makedirs(savedmatdir + 'gaptv/method{:d}/'.format(method_type))
+            if not os.path.exists(savedmatdir + projmeth + 'ffdnet/method{:d}/'.format(method_type)):
+                os.makedirs(savedmatdir + projmeth + 'ffdnet/method{:d}/'.format(method_type))
+            if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}/'.format(method_type)):
+                os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}/'.format(method_type))
         for i in range(orig.shape[2]):
-            if i < 10:
-                plt.imsave('{}gaptv/method{:d}/{}_gaptv_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapffdnet/method{:d}/{}_gapffdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapfastdvdnet/method{:d}/{}_gapfastdvdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+            if tv_initialize:
+                iter_max = 5
+                if i < 10:
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}_tv_initialize/{}_{projmeth}ffdnet_tv_initialize{:d}_0{:d}.jpeg'.format(savedmatdir, method_type, datname, iter_max, i, projmeth=projmeth), vgap_ffd_color_demosaic_bayer[:,:,i])
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}_tv_initialize/{}_{projmeth}fastdvdnet_tv_initialize{:d}_0{:d}.jpeg'.format(savedmatdir, method_type, datname, iter_max, i, projmeth=projmeth), vgap_fastdvd_color_demosaic_bayer[:,:,i])
+                else:
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}_tv_initialize/{}_{projmeth}ffdnet_tv_initialize{:d}_{:d}.jpeg'.format(savedmatdir, method_type, datname, iter_max, i, projmeth=projmeth), vgap_ffd_color_demosaic_bayer[:,:,i])
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}_tv_initialize/{}_{projmeth}fastdvdnet_tv_initialize{:d}_{:d}.jpeg'.format(savedmatdir, method_type, datname, iter_max, i, projmeth=projmeth), vgap_fastdvd_color_demosaic_bayer[:,:,i])
             else:
-                plt.imsave('{}gaptv/method{:d}/{}_gaptv_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapffdnet/method{:d}/{}_gapffdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapffdnet[:,:,i], cmap='Greys_r')
-                plt.imsave('{}gapfastdvdnet/method{:d}/{}_gapfastdvdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+                if i < 10:
+                    plt.imsave('{}gaptv/method{:d}/{}_gaptv_0{:d}.jpeg'.format(savedmatdir, method_type, datname, i), vgaptv_bayer[:,:,i])
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}/{}_{projmeth}ffdnet_0{:d}.jpeg'.format(savedmatdir, method_type, datname, i, projmeth=projmeth), vgap_ffd_color_demosaic_bayer[:,:,i])
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}/{}_{projmeth}fastdvdnet_0{:d}.jpeg'.format(savedmatdir, method_type, datname, i, projmeth=projmeth), vgap_fastdvd_color_demosaic_bayer[:,:,i])
+                else:
+                    plt.imsave('{}gaptv/method{:d}/{}_gaptv_{:d}.jpeg'.format(savedmatdir, method_type, datname, i), vgaptv_bayer[:,:,i])
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}/{}_{projmeth}ffdnet_{:d}.jpeg'.format(savedmatdir, method_type, datname, i, projmeth=projmeth), vgap_ffd_color_demosaic_bayer[:,:,i])
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}/{}_{projmeth}fastdvdnet_{:d}.jpeg'.format(savedmatdir, method_type, datname, i, projmeth=projmeth), vgap_fastdvd_color_demosaic_bayer[:,:,i])
     
+    print(psnrall_tv.shape)
     if SAVE_DATA:
         if not os.path.exists(savedmatdir + 'data/'):
             os.makedirs(savedmatdir + 'data/')
-        filelast_name = "_psnr_method{:d}.csv".format(method_type)
-        psnrall_gaptv = np.array(psnrall_gaptv)
-        psnrall_gapffdnet = np.array(psnrall_gapffdnet)
-        psnrall_gapfastdvdnet = np.array(psnrall_gapfastdvdnet)
+        if tv_initialize:
+            filelast_name = "_psnr_method{:d}_tv_initialize{:d}.csv".format(method_type, iter_max)
+        else:
+            filelast_name = "_psnr_method{:d}.csv".format(method_type)
+        psnrall_gaptv = np.array(psnrall_tv)
+        psnrall_gapffdnet = np.array(psnrall_ffdnet_color)
+        psnrall_gapfastdvdnet = np.array(psnrall_fastdvdnet_demosaic_t)
         psnrmean_gaptv = psnrall_gaptv.mean(axis=0)
         psnrmean_gapffdnet = psnrall_gapffdnet.mean(axis=0)
         psnrmean_gapfastdvdnet = psnrall_gapfastdvdnet.mean(axis=0)
         gaptv_path = savedmatdir + 'data/' + "gaptv" + filelast_name
-        ffdnet_path = savedmatdir + 'data/' + "gapffdnet" + filelast_name
-        fastdvdnet_path = savedmatdir + 'data/' + "gapfastdvdnet" + filelast_name
+        ffdnet_path = savedmatdir + 'data/' + projmeth + "ffdnet" + filelast_name
+        fastdvdnet_path = savedmatdir + 'data/' + projmeth + "fastdvdnet" + filelast_name
         np.savetxt(gaptv_path, psnrmean_gaptv)
         np.savetxt(ffdnet_path, psnrmean_gapffdnet)
         np.savetxt(fastdvdnet_path, psnrmean_gapfastdvdnet)
@@ -578,7 +643,7 @@ for ncount in range(1):
         if not os.path.exists(savedmatdir + 'meas/'):
             os.makedirs(savedmatdir + 'meas/')
         for i in range(meas.shape[2]):
-            plt.imsave('{}meas/meas{}.jpeg'.format(savedmatdir, i), meas[:,:,i], cmap='Greys_r')
+            plt.imsave('{}meas/meas{}.jpeg'.format(savedmatdir, i), meas_bayer[:,:,i], cmap='Greys_r')
     # sio.savemat('{}gap{}_{}{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask),
     #             {'vgapdenoise':vgapdenoise},{'psnr_gapdenoise':psnr_gapdenoise})
     # sio.savemat('{}gap{}_{}{:d}_sigma{:d}_all7.mat'.format(savedmatdir,denoiser.lower(),datname,nmask,int(sigma[-1]*MAXB)),

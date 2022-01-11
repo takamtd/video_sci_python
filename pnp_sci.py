@@ -630,6 +630,9 @@ def gap_denoise(y, Phi_sum, A, At, _lambda=1, accelerate=True,
     k = 0
     for idx, nsig in enumerate(sigma): # iterate all noise levels
         for it in range(iter_max[idx]):
+            # if idx == 0:
+                # print("initial: ")
+                # print(psnr(X_orig, x))
             yb = A(x)
             if accelerate: # accelerated version of GAP
                 y1 = y1 + (y-yb)
