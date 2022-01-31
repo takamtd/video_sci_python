@@ -115,7 +115,7 @@ for datname, nframe in zip(alldatname, allnframes):
     # In[6]:
     #################################################################################
     projmeth = 'gap'
-    method_type = 7
+    method_type = 8
     tv_initialize = False
 
     import torch
@@ -149,6 +149,9 @@ for datname, nframe in zip(alldatname, allnframes):
         iter_max = [1 for i in range(80)]
     elif method_type == 7:
         sigma = [(42/(1 + np.exp((i-30)/10)) + 12)/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    elif method_type == 8:
+        sigma    = [(100*0.5**(i/20))/255 for i in range(80)]
         iter_max = [1 for i in range(80)]
     # sigma    = [12/255, 6/255] # pre-set noise standard deviation
     # iter_max = [10,10] # maximum number of iterations
@@ -249,6 +252,9 @@ for datname, nframe in zip(alldatname, allnframes):
         iter_max = [1 for i in range(80)]
     elif method_type == 7:
         sigma = [(42/(1 + np.exp((i-30)/10)) + 12)/255 for i in range(80)]
+        iter_max = [1 for i in range(80)]
+    elif method_type == 8:
+        sigma    = [(100*0.5**(i/20))/255 for i in range(80)]
         iter_max = [1 for i in range(80)]
     # sigma    = [12/255] # pre-set noise standard deviation
     # iter_max = [20] # maximum number of iterations
