@@ -9,8 +9,8 @@ dataname = 'kobe32'
 data_path = "/grayscale/"+dataname+"/data/"
 # file_names = ["gapffdnet_psnr_method1", "gapffdnet_psnr_method2", "gapffdnet_psnr_method3"]
 # file_names = ["gapfastdvdnet_psnr_method1", "gapfastdvdnet_psnr_method2", "gapfastdvdnet_psnr_method3"]
-# file_names = ["gapfastdvdnet_psnr_method1_tv_initialize1", "gapfastdvdnet_psnr_method2_tv_initialize1", "gapfastdvdnet_psnr_method3_tv_initialize1"]
-file_names = ["gapfastdvdnet_psnr_method1_tv_initialize5", "gapfastdvdnet_psnr_method2_tv_initialize5", "gapfastdvdnet_psnr_method3_tv_initialize5"]
+file_names = ["gapfastdvdnet_psnr_method1_tv_initialize1", "gapfastdvdnet_psnr_method2_tv_initialize1", "gapfastdvdnet_psnr_method3_tv_initialize1"]
+# file_names = ["gapfastdvdnet_psnr_method1_tv_initialize5", "gapfastdvdnet_psnr_method2_tv_initialize5", "gapfastdvdnet_psnr_method3_tv_initialize5"]
 
 # file_names = ["gapfastdvdnet_psnr_method1", "gapfastdvdnet_psnr_method2", "gapfastdvdnet_psnr_method3", "gapfastdvdnet_psnr_method4", "gapfastdvdnet_psnr_method5"]
 # file_names = ["gapfastdvdnet_psnr_method1_tv_initialize1", "gapfastdvdnet_psnr_method2_tv_initialize1", "gapfastdvdnet_psnr_method3_tv_initialize1", "gapfastdvdnet_psnr_method4_tv_initialize1", "gapfastdvdnet_psnr_method5_tv_initialize1"]
@@ -92,7 +92,7 @@ plt.xlim([0,60])
 plt.legend(loc = "lower right")
 plt.xlabel("iteration number")
 plt.ylabel("psnr")
-curr_gragh_path = gragh_path + "{}.png".format("fastdvdnet3_tv_initialize5")
+curr_gragh_path = gragh_path + "{}.png".format("fastdvdnet3_tv_initialize1")
 plt.savefig(curr_gragh_path)
 
 # FFDNet TV

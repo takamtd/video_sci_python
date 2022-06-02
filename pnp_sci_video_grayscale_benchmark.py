@@ -35,7 +35,7 @@ resultsdir = './results' # results
 # allnframes = [      -1,         -1,         1,       1,       -1,        -1]
 # alldatname = ['drop40','crash32','aerial32']
 # allnframes = [       1,       -1,        -1]
-alldatname = ['runner40']
+alldatname = ['kobe32']
 allnframes = [      -1]
 count = 0
 
@@ -98,7 +98,7 @@ for datname, nframe in zip(alldatname, allnframes):
     _lambda = 1 # regularization factor
     accelerate = True # enable accelerated version of GAP
     denoiser = 'tv' # total variation (TV)
-    iter_max = 80 # maximum number of iterations
+    iter_max = 1 # maximum number of iterations
     tv_weight = 0.3 # TV denoising weight (larger for smoother but slower)
     tv_iter_max = 5 # TV denoising maximum number of iterations each
 
@@ -118,8 +118,8 @@ for datname, nframe in zip(alldatname, allnframes):
     # In[6]:
     #################################################################################
     projmeth = 'gap'
-    method_type = 8
-    tv_initialize = False
+    method_type = 3
+    tv_initialize = True
 
     import torch
     from packages.ffdnet.models import FFDNet
