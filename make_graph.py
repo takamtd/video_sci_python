@@ -5,12 +5,12 @@ import os
 
 dir_path = "/home/jovyan/workdir/results/savedmat"
 # alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
-dataname = 'traffic48'
+dataname = 'kobe32'
 data_path = "/grayscale/"+dataname+"/data/"
-file_names = ["gapffdnet_psnr_method1", "gapffdnet_psnr_method2", "gapffdnet_psnr_method3"]
+# file_names = ["gapffdnet_psnr_method1", "gapffdnet_psnr_method2", "gapffdnet_psnr_method3"]
 # file_names = ["gapfastdvdnet_psnr_method1", "gapfastdvdnet_psnr_method2", "gapfastdvdnet_psnr_method3"]
 # file_names = ["gapfastdvdnet_psnr_method1_tv_initialize1", "gapfastdvdnet_psnr_method2_tv_initialize1", "gapfastdvdnet_psnr_method3_tv_initialize1"]
-# file_names = ["gapfastdvdnet_psnr_method1_tv_initialize5", "gapfastdvdnet_psnr_method2_tv_initialize5", "gapfastdvdnet_psnr_method3_tv_initialize5"]
+file_names = ["gapfastdvdnet_psnr_method1_tv_initialize5", "gapfastdvdnet_psnr_method2_tv_initialize5", "gapfastdvdnet_psnr_method3_tv_initialize5"]
 
 # file_names = ["gapfastdvdnet_psnr_method1", "gapfastdvdnet_psnr_method2", "gapfastdvdnet_psnr_method3", "gapfastdvdnet_psnr_method4", "gapfastdvdnet_psnr_method5"]
 # file_names = ["gapfastdvdnet_psnr_method1_tv_initialize1", "gapfastdvdnet_psnr_method2_tv_initialize1", "gapfastdvdnet_psnr_method3_tv_initialize1", "gapfastdvdnet_psnr_method4_tv_initialize1", "gapfastdvdnet_psnr_method5_tv_initialize1"]
@@ -68,32 +68,32 @@ for file_path in file_paths:
 # plt.savefig(curr_gragh_path)
 
 # FFDnet
-fig = plt.figure(0)
-plt.plot(data[0], linestyle = "-", label = "method1")
-plt.plot(data[1], linestyle = "--", label = "method2")
-plt.plot(data[2], linestyle = ":", label = "method3")
-plt.title("FFDnet:{}".format(dataname[:-2]))
-plt.ylim([0,35])
-plt.xlim([0,80])
-plt.legend(loc = "lower right")
-plt.xlabel("iteration number")
-plt.ylabel("psnr")
-curr_gragh_path = gragh_path + "{}.png".format("ffdnet3")
-plt.savefig(curr_gragh_path)
-
-# TVで初期化したやつ
 # fig = plt.figure(0)
 # plt.plot(data[0], linestyle = "-", label = "method1")
 # plt.plot(data[1], linestyle = "--", label = "method2")
 # plt.plot(data[2], linestyle = ":", label = "method3")
-# plt.title("FastDVDnet_tv_initialized:{}".format(dataname[:-2]))
-# plt.ylim([0,40])
+# plt.title("FFDnet:{}".format(dataname[:-2]))
+# plt.ylim([0,35])
 # plt.xlim([0,80])
 # plt.legend(loc = "lower right")
 # plt.xlabel("iteration number")
 # plt.ylabel("psnr")
-# curr_gragh_path = gragh_path + "{}.png".format("fastdvdnet3_tv_initialize5")
+# curr_gragh_path = gragh_path + "{}.png".format("ffdnet3")
 # plt.savefig(curr_gragh_path)
+
+# TVで初期化したやつ
+fig = plt.figure(0)
+plt.plot(data[0][:59], linestyle = "-", label = "method1")
+plt.plot(data[1][:59], linestyle = "--", label = "method2")
+plt.plot(data[2][:59], linestyle = ":", label = "method3")
+plt.title("FastDVDnet_tv_initialized:{}".format(dataname[:-2]))
+plt.ylim([0,35])
+plt.xlim([0,60])
+plt.legend(loc = "lower right")
+plt.xlabel("iteration number")
+plt.ylabel("psnr")
+curr_gragh_path = gragh_path + "{}.png".format("fastdvdnet3_tv_initialize5")
+plt.savefig(curr_gragh_path)
 
 # FFDNet TV
 # fig = plt.figure(0)
