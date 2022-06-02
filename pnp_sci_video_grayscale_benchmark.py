@@ -33,8 +33,11 @@ resultsdir = './results' # results
 
 # alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 # allnframes = [      -1,         -1,         1,       1,       -1,        -1]
+# alldatname = ['drop40','crash32','aerial32']
+# allnframes = [       1,       -1,        -1]
 alldatname = ['runner40']
 allnframes = [      -1]
+count = 0
 
 for datname, nframe in zip(alldatname, allnframes):
     # datname = 'kobe32'        # name of the dataset
@@ -115,7 +118,7 @@ for datname, nframe in zip(alldatname, allnframes):
     # In[6]:
     #################################################################################
     projmeth = 'gap'
-    method_type = 2
+    method_type = 8
     tv_initialize = False
 
     import torch
@@ -133,7 +136,7 @@ for datname, nframe in zip(alldatname, allnframes):
         sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
         iter_max = [20, 20, 20, 20] # maximum number of iterations
     elif method_type == 2:
-        sigma    = [1000*0.97**i/255 for i in range(80)]
+        sigma    = [100*0.97**i/255 for i in range(80)]
         iter_max = [1 for i in range(80)]
     elif method_type == 3:
         sigma    = [12/255]
@@ -236,7 +239,7 @@ for datname, nframe in zip(alldatname, allnframes):
         sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
         iter_max = [20, 20, 20, 20] # maximum number of iterations
     elif method_type == 2:
-        sigma    = [1000*0.97**i/255 for i in range(80)]
+        sigma    = [100*0.97**i/255 for i in range(80)]
         iter_max = [1 for i in range(80)]
     elif method_type == 3:
         sigma    = [12/255]
@@ -326,7 +329,7 @@ for datname, nframe in zip(alldatname, allnframes):
     
     SAVE_RESULT = True
     SAVE_DATA = True
-    SAVE_MEAS = False
+    SAVE_MEAS = True
     OPTION = False
     if OPTION:
         option_name = '60times'
