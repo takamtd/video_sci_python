@@ -33,7 +33,7 @@ resultsdir = './results' # results
 
 # alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 # allnframes = [      -1,         -1,         1,       1,       -1,        -1]
-alldatname = ['kobe32']
+alldatname = ['runner40']
 allnframes = [      -1]
 
 for datname, nframe in zip(alldatname, allnframes):
@@ -115,7 +115,7 @@ for datname, nframe in zip(alldatname, allnframes):
     # In[6]:
     #################################################################################
     projmeth = 'gap'
-    method_type = 8
+    method_type = 2
     tv_initialize = False
 
     import torch
@@ -128,12 +128,12 @@ for datname, nframe in zip(alldatname, allnframes):
     accelerate = True # enable accelerated version of GAP
     denoiser = 'ffdnet' # video non-local network 
     noise_estimate = False # disable noise estimation for GAP
-    # method_type = 3
+    # method_type = 1
     if method_type == 1:
         sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
         iter_max = [20, 20, 20, 20] # maximum number of iterations
     elif method_type == 2:
-        sigma    = [50*0.97**i/255 for i in range(80)]
+        sigma    = [1000*0.97**i/255 for i in range(80)]
         iter_max = [1 for i in range(80)]
     elif method_type == 3:
         sigma    = [12/255]
@@ -236,7 +236,7 @@ for datname, nframe in zip(alldatname, allnframes):
         sigma    = [100/255, 50/255, 25/255, 12/255] # pre-set noise standard deviation
         iter_max = [20, 20, 20, 20] # maximum number of iterations
     elif method_type == 2:
-        sigma    = [50*0.97**i/255 for i in range(80)]
+        sigma    = [1000*0.97**i/255 for i in range(80)]
         iter_max = [1 for i in range(80)]
     elif method_type == 3:
         sigma    = [12/255]
@@ -327,6 +327,9 @@ for datname, nframe in zip(alldatname, allnframes):
     SAVE_RESULT = True
     SAVE_DATA = True
     SAVE_MEAS = False
+    OPTION = False
+    if OPTION:
+        option_name = '60times'
 
     savedmatdir = resultsdir + '/savedmat/grayscale/' + alldatname[0] + '/'
     if not os.path.exists(savedmatdir):
@@ -343,11 +346,19 @@ for datname, nframe in zip(alldatname, allnframes):
             os.makedirs(savedmatdir + projmeth + 'ffdnet/')
         if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/'):
             os.makedirs(savedmatdir + projmeth + 'fastdvdnet/')
+        
         if tv_initialize:
             if not os.path.exists(savedmatdir + projmeth + 'ffdnet/method{:d}_tv_initialize/'.format(method_type)):
                 os.makedirs(savedmatdir + projmeth + 'ffdnet/method{:d}_tv_initialize/'.format(method_type))
             if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}_tv_initialize/'.format(method_type)):
                 os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}_tv_initialize/'.format(method_type))
+        elif OPTION:
+            if not os.path.exists(savedmatdir + 'gaptv/method{:d}_{}/'.format(method_type, option_name)):
+                os.makedirs(savedmatdir + 'gaptv/method{:d}_{}/'.format(method_type, option_name))
+            if not os.path.exists(savedmatdir + projmeth + 'ffdnet/method{:d}_{}/'.format(method_type, option_name)):
+                os.makedirs(savedmatdir + projmeth + 'ffdnet/method{:d}_{}/'.format(method_type, option_name))
+            if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}_{}/'.format(method_type, option_name)):
+                os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}_{}/'.format(method_type, option_name))
         else:
             if not os.path.exists(savedmatdir + 'gaptv/method{:d}/'.format(method_type)):
                 os.makedirs(savedmatdir + 'gaptv/method{:d}/'.format(method_type))
@@ -355,6 +366,7 @@ for datname, nframe in zip(alldatname, allnframes):
                 os.makedirs(savedmatdir + projmeth + 'ffdnet/method{:d}/'.format(method_type))
             if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}/'.format(method_type)):
                 os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}/'.format(method_type))
+        
         for i in range(orig.shape[2]):
             if tv_initialize:
                 iter_max = 5
@@ -364,6 +376,15 @@ for datname, nframe in zip(alldatname, allnframes):
                 else:
                     plt.imsave('{}{projmeth}ffdnet/method{:d}_tv_initialize/{}_{projmeth}ffdnet_tv_initialize{:d}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], iter_max, i, projmeth=projmeth), vgapffdnet[:,:,i], cmap='Greys_r')
                     plt.imsave('{}{projmeth}fastdvdnet/method{:d}_tv_initialize/{}_{projmeth}fastdvdnet_tv_initialize{:d}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], iter_max, i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+            elif OPTION:
+                if i < 10:
+                    plt.imsave('{}gaptv/method{:d}_{option_name}/{}_gaptv_{option_name}_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, option_name=option_name), vgaptv[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}_{option_name}/{}_{projmeth}ffdnet_{option_name}_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth, option_name=option_name), vgapffdnet[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}_{option_name}/{}_{projmeth}fastdvdnet_{option_name}_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth, option_name=option_name), vgapfastdvdnet[:,:,i], cmap='Greys_r')
+                else:
+                    plt.imsave('{}gaptv/method{:d}_{option_name}/{}_gaptv_{option_name}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, option_name=option_name), vgaptv[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}ffdnet/method{:d}_{option_name}/{}_{projmeth}ffdnet_{option_name}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth, option_name=option_name), vgapffdnet[:,:,i], cmap='Greys_r')
+                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}_{option_name}/{}_{projmeth}fastdvdnet_{option_name}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth, option_name=option_name), vgapfastdvdnet[:,:,i], cmap='Greys_r')
             else:
                 if i < 10:
                     plt.imsave('{}gaptv/method{:d}/{}_gaptv_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i), vgaptv[:,:,i], cmap='Greys_r')
@@ -379,6 +400,8 @@ for datname, nframe in zip(alldatname, allnframes):
             os.makedirs(savedmatdir + 'data/')
         if tv_initialize:
             filelast_name = "_psnr_method{:d}_tv_initialize{:d}.csv".format(method_type, iter_max)
+        elif OPTION:
+            filelast_name = "_psnr_method{:d}_{}.csv".format(method_type, option_name)
         else:
             filelast_name = "_psnr_method{:d}.csv".format(method_type)
         psnrall_gaptv = np.array(psnrall_gaptv)

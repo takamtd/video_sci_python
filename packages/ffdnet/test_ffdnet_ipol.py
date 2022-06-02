@@ -162,9 +162,9 @@ def ffdnet_vdenoiser(vnoisy, sigma, model=None, useGPU=True):
 
 		# Test mode
 		with torch.no_grad(): # PyTorch v0.4.0
-		    imnoisy = Variable(imnoisy.type(dtype))
-		    sigma = Variable(torch.FloatTensor([sigma]).type(dtype))
-
+			imnoisy = Variable(imnoisy.type(dtype))
+			sigma = Variable(torch.FloatTensor([sigma]).type(dtype))
+		
 		# Estimate noise and subtract it to the input image
 		im_noise_estim = model(imnoisy, sigma)
 
