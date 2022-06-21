@@ -21,11 +21,24 @@ from packages.ffdnet.models import FFDNet
 from scipy.io.matlab.mio import _open_file
 from scipy.io.matlab.miobase import get_matfile_version
 
-def generate_test_train():
-    
+def separate_train_test(dataset, test_rate):
+    # test_rate 0.0~1.0
+    np.random.seed(seed=0)
+    num_all = len(dataset)
+    id_all = np.random.choice(num_all, num_all, replace=False)
+    num_test = int(num_all*test_rate)
+    id_test  = id_all[0:num_test]
+    id_train = id_all[num_test:num_all]
+    test_dataset  = dataset[id_test]
+    train_dataset = dataset[id_train]
     return test, train
 
-def generate_batch():
+def generate_batch(dataset, batch_num):
+    data = np.random.choice(dataset, batch_num, replace=False)
+    for batch in range(batch_num):
+        meas = data[batch][0]
+        mask = data[batch][1]
+        orig = data[batch][2]
     return 0
 
 def inverse_psnr(psnr, MAXB=255):
@@ -54,7 +67,7 @@ class UNROLL_PNP_FFDNET(nn.Module):
                         _lambda=None, accelerate=None,
                         denoiser=None, model=None, 
                         iter_max=[1 for i in range(80)]):
-        
+        # 反復の最大値を決める！　インクリメンタル学習に必要！
         if projmeth.lower() == 'gap':
             if tv_initialize:
                 vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = admmdenoise_cacti(meas, mask, A, At,
@@ -112,11 +125,13 @@ class UNROLL_PNP_FFDNET(nn.Module):
 datasetdir = './dataset/cacti/grayscale_benchmark' # dataset
 resultsdir = './results' # results
 
+# 全データ数　28
 alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 allnframes = [      -1,         -1,         1,       1,       -1,        -1]
 nframe = -1
 # alldatname = ['kobe32']
 # allnframes = [      -1]
+
 
 # load data
 alldata = []
@@ -140,8 +155,10 @@ for datname, nframe in zip(alldatname, allnframes):
         data.append(mask)
         start_point = meas_num*mask.shape[2]
         data.append(orig[start_point : start_point + mask.shape[2] - 1])
-    
-    alldata.append(data)
+        alldata.append(data)
+
+
+data_num = len(alldata)
 
 iframe = 0
 # nframe = 1
@@ -161,7 +178,8 @@ mask_sum[mask_sum==0] = 1
 
 max_layers = 80
 adam_lr = 0.04  # initial learning parameter for Adam
-batch_num = 200
+batch_num = 7
+epoch_num = 280
 
 # In[6]:
 #################################################################################
@@ -206,33 +224,41 @@ model.eval() # evaluation mode
 network = UNROLL_PNP_FFDNET(max_layers).to(device)  # generating an instance of TISTA network
 opt = optim.Adam(network.parameters(), lr=adam_lr)  # setting for optimizer (Adam)
 
+train, test = separate_train_test(alldata, 1/7)
+
 start = time.time()
 
 # incremental trainnig
 for layer in (range(max_layers)):
     # training process  
-    for i in range(batch_num):
-        if (layer > 10): # change learning rate of Adam
-            opt = optim.Adam(network.parameters(), lr=adam_lr/50.0)
-        meas_t, mask_t, orig_t = torch.Tensor(generate_batch()).to(device)
-        opt.zero_grad()
-        vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = network(meas, mask, A, At,
-                                                                                projmeth=projmeth, v0=None, orig=orig,
-                                                                                iframe=iframe, nframe=nframe,
-                                                                                MAXB=MAXB, maskdirection='plain',
-                                                                                _lambda=_lambda, accelerate=accelerate,
-                                                                                denoiser=denoiser, model=model, 
-                                                                                iter_max=iter_max).to(device)
-        # x_hat = network(x, s_zero, layer+1).to(device)
-        loss = CustomLoss(mean(psnr_gapffdnet))
-        loss.backward()
+    for epoch in range(epoch_num):
+        for i in range(len(train)/batch_num):
+            opt.zero_grad()
+            meas_t, mask_t, orig_t = generate_batch(train, batch_num)
+            for batch in range(batch_num):
+                if (layer > 10): # change learning rate of Adam
+                    opt = optim.Adam(network.parameters(), lr=adam_lr/50.0)
+                
+                meas_t[batch] = torch.Tensor(meas_t[batch]).to(device)
+                mask_t[batch] = torch.Tensor(mask_t[batch]).to(device)
+                orig_t[batch] = torch.Tensor(orig_t[batch]).to(device)
+                vgapffdnet,tgapffdnet,psnr_gapffdnet,ssim_gapffdnet,psnrall_gapffdnet = network(meas, mask, A, At,
+                                                                                        projmeth=projmeth, v0=None, orig=orig,
+                                                                                        iframe=iframe, nframe=nframe,
+                                                                                        MAXB=MAXB, maskdirection='plain',
+                                                                                        _lambda=_lambda, accelerate=accelerate,
+                                                                                        denoiser=denoiser, model=model, 
+                                                                                        iter_max=iter_max).to(device)
+                # x_hat = network(x, s_zero, layer+1).to(device)
+            loss = CustomLoss(mean(psnr_gapffdnet))
+            loss.backward()
 
-        grads = torch.stack([param.grad for param in network.parameters()])
-        if isnan(grads).any():  # avoiding NaN in gradients
-            continue
+            grads = torch.stack([param.grad for param in network.parameters()])
+            if isnan(grads).any():  # avoiding NaN in gradients
+                continue
 
-        opt.step()
-        print("PSNR:{}", mean(psnr_gapffdnet))
+            opt.step()
+            print("PSNR:{}", mean(psnr_gapffdnet))
 # end of training training
 
 elapsed_time = time.time() - start

@@ -16,9 +16,10 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 import torch.optim as optim
-from packages.ffdnet.models import FFDNet
 from packages.fastdvdnet.models import FastDVDnet
 
+from scipy.io.matlab.mio import _open_file
+from scipy.io.matlab.miobase import get_matfile_version
 
 # [0] environment configuration
 datasetdir = './dataset/cacti/grayscale_benchmark' # dataset
