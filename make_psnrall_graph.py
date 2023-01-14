@@ -4,8 +4,8 @@ import numpy as np
 import os
 import statistics
 
-method_name ="ex_kobe_method1_lr0005"
-projmeth = 'admm'
+projmeth = 'gap'
+dataname = 'ex_davis_method1_acc'
 accelerate = False
 
 datanames = ['kobe32', 'traffic48', 'runner40','drop40','crash32','aerial32']

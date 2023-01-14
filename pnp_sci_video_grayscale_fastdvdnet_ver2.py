@@ -43,15 +43,19 @@ def read_data(path):
         data[:,:,i] = cv2.imread(path + filename, cv2.IMREAD_GRAYSCALE)
     return data
 
-def mask_img(origs, masks):
-    meas = (origs * masks)
-    meas = np.sum(meas, axis=2)
-    return meas
-
 def add_noise(y_clear,sigma2):
-    noise = np.random.normal(loc = 0, scale = sqrt(sigma2)/255, size = y_clear.shape) # sigmaでノイズ生成
-    y = y_clear + noise # ブラー画像にノイズを不可
+    noise = np.random.normal(loc = 0, scale = np.sqrt(sigma2)/255, size = y_clear.shape) 
+    y = y_clear + noise
     return y
+
+def mask_img(origs, masks, noise = False, sigma2=0):
+    m = (origs * masks)
+    m1 = np.sum(m, axis=2)
+    if noise:
+        for i in range(m.shape[2]):
+            m[:,:,i] = add_noise(m[:,:,i], sigma2)
+    m = np.sum(m, axis=2)
+    return m
 
 # [0] environment configuration
 
@@ -83,18 +87,29 @@ denoiser = 'fastdvdnet' # video non-local network
 noise_estimate = False # disable noise estimation for GAP
 
 method_type = 1
-OPTION = False
-SAVE_RESULT = True
+OPTION = True
+SAVE_RESULT = False
 SAVE_DATA = True
 SAVE_MEAS = False
+
+# ノイズの設定
+np.random.seed(seed=0)
+amount_of_sigma = 1
+sigma2 = np.power(255*0.01*amount_of_sigma,2)
 
 if method_type == 1:
     sigma    = [50/255, 25/255, 12/255] # pre-set noise standard deviation
     iter_max = [20, 20, 20] # maximum number of iterations
     if accelerate:
-        policy_name = 'method1_acc'
+        if amount_of_sigma == 0:
+            policy_name = 'method1_acc'
+        else:
+            policy_name = 'method1_acc_add_meas_noise'
     else:
-        policy_name = 'method1'
+        if amount_of_sigma == 0:
+            policy_name = 'method1'
+        else:
+            policy_name = 'method1_add_meas_noise'
     # policy_name = 'method1'
 elif method_type == 2:
     sigma    = [50*0.97**i/255 for i in range(60)]
@@ -122,7 +137,6 @@ elif method_type == 9:
     parameter_name = 'sigma'
     # policy_name = 'kobe_method1'
     
-
     dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
     filename = parameter_name + '_' + policy_name
     file_path = dir_path + "data_files/" + filename + ".csv"
@@ -197,16 +211,20 @@ matfile = maskdir + '/' + alldatname[0] + '_cacti.mat'
 file = sio.loadmat(matfile)
 mask = np.float32(file['mask'])
 
+
 dirnames = os.listdir(datasetdir)
 dirnames.sort()
+# for dirname in dirnames[-9:]:
 for dirname in dirnames:
     #DAVISデータの読み込み
     orig = np.float32(read_data(datasetdir + "/" + dirname + "/" + "orig/"))
     meas = np.zeros((orig.shape[0], orig.shape[1], int(orig.shape[2]/8)))
     for i in range(int(orig.shape[2]/8)):
         start_point = i * mask.shape[2]
-        meas[:,:,i] = np.float32(mask_img(orig[:, :, start_point : start_point + mask.shape[2]], mask))
-        # meas[:,:,i] = add_noise(meas[:,:,i], 12)
+        if amount_of_sigma == 0:
+            meas[:,:,i] = np.float32(mask_img(orig[:, :, start_point : start_point + mask.shape[2]], mask, noise=False))
+        else:
+            meas[:,:,i] = np.float32(mask_img(orig[:, :, start_point : start_point + mask.shape[2]], mask, noise=True, sigma2=sigma2))
 
     # meas = np.float32(meas)
     print()
@@ -286,10 +304,10 @@ for dirname in dirnames:
     nmask = mask.shape[2]
     
     if OPTION:
-        if method_type == 9:
+        if method_type == 9 and amount_of_sigma != 0:
+            option_name = policy_name + "_add_meas_noise"
+        else:
             option_name = policy_name
-        elif method_type == 1 and accelerate == True:
-            option_name = 'method1_acc'
 
     savedmatdir = resultsdir + '/savedmat/grayscale/' + projmeth + '/'+ policy_name + '/' + dirname + '/'
     if not os.path.exists(savedmatdir):

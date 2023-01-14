@@ -31,6 +31,11 @@ def show_prams(p):
 def relu(x):
     return max(0, x)
 
+def add_noise(y_clear,sigma2):
+    noise = np.random.normal(loc = 0, scale = y_clear.shape[2]*np.sqrt(sigma2)/255, size = y_clear.shape) # sigmaでノイズ生成
+    y = y_clear + noise # ブラー画像にノイズを不可
+    return y
+
 # [0] environment configuration
 
 alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
@@ -60,20 +65,30 @@ train_gamma = False
 denoiser = 'fastdvdnet' # video non-local network 
 noise_estimate = False # disable noise estimation for GAP
 
-method_type = 9
+method_type = 1
 OPTION = True
 SAVE_RESULT = False
 SAVE_DATA = True
 SAVE_MEAS = False
 
+# ノイズの設定
+np.random.seed(seed=0)
+amount_of_sigma = 1
+sigma2 = np.power(255*0.01*amount_of_sigma,2)
+
 if method_type == 1:
     sigma    = [50/255, 25/255, 12/255] # pre-set noise standard deviation
     iter_max = [20, 20, 20] # maximum number of iterations
     if accelerate:
-        policy_name = 'method1_acc'
+        if amount_of_sigma == 0:
+            policy_name = 'method1_acc'
+        else:
+            policy_name = 'method1_acc_add_meas_noise'
     else:
-        policy_name = 'method1'
-    # policy_name = 'method1'
+        if amount_of_sigma == 0:
+            policy_name = 'method1'
+        else:
+            policy_name = 'method1_add_meas_noise'
 elif method_type == 2:
     sigma    = [50*0.97**i/255 for i in range(60)]
     iter_max = [1 for i in range(60)]
@@ -96,7 +111,7 @@ elif method_type == 8:
     sigma    = [(100*0.5**(i/20))/255 for i in range(80)]
     iter_max = [1 for i in range(80)]
 elif method_type == 9:
-    policy_name = 'ex_kobe_method1_lr0005'
+    policy_name = 'ex_davis_method1_acc'
     parameter_name = 'sigma'
     # policy_name = 'kobe_method1'
     
@@ -196,6 +211,8 @@ for datname, nframe in zip(alldatname, allnframes):
     meas = np.float32(file['meas'])
     mask = np.float32(file['mask'])
     orig = np.float32(file['orig'])
+    if amount_of_sigma != 0:
+        meas = add_noise(meas, sigma2)
     # else: # MATLAB .mat v7.3
     #     file =  h5py.File(matfile, 'r')  # for '-v7.3' .mat file (MATLAB)
     #     meas = np.float32(file['meas']).transpose()
@@ -277,10 +294,10 @@ for datname, nframe in zip(alldatname, allnframes):
     nmask = mask.shape[2]
     
     if OPTION:
-        if method_type == 9:
+        if method_type == 9 and amount_of_sigma != 0:
+            option_name = policy_name + "_add_meas_noise"
+        else:
             option_name = policy_name
-        elif method_type == 1 and accelerate == True:
-            option_name = 'method1_acc'
 
     savedmatdir = resultsdir + '/savedmat/grayscale/' + projmeth + '/'+ policy_name + '/' + datname + '/'
     if not os.path.exists(savedmatdir):

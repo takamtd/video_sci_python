@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 projmeth = 'admm'
-dataname = 'ex_kobe_method1_lr0005'
+dataname = 'ex_davis_method1'
 
 dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
 filename = 'loss_' + dataname
@@ -23,7 +23,7 @@ fig = plt.figure(0)
 plt.plot(data, linestyle = "-")
 plt.title(dataname)
 # plt.ylim([0, 0.01])
-plt.xlabel("epoch")
+plt.xlabel("loop")
 plt.ylabel("loss")
 curr_gragh_path = gragh_path + "{}.png".format(filename)
 plt.savefig(curr_gragh_path)

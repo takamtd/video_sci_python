@@ -1,10 +1,10 @@
 version: '3'
 services:
   stats:
-    image: pytorch_ubuntu_env:v2.3
+    image: pytorch_ubuntu_env:v2.1
     user: jovyan
     ports:
-      - "8000:8000"
+      - "8888:8888"
     volumes:
       - ../:/home/jovyan/workdir
     deploy:

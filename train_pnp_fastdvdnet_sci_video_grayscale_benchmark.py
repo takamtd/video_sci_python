@@ -236,7 +236,7 @@ for datname, nframe in zip(alldatname, allnframes):
     #     meas = np.float32(file['meas']).transpose()
     #     mask = np.float32(file['mask']).transpose()
     #     orig = np.float32(file['orig']).transpose()
-    print(meas)
+    # print(meas)
     meas = torch.from_numpy(meas).to(device)
     mask = torch.from_numpy(mask).to(device)
     orig = torch.from_numpy(orig).to(device)

@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-projmeth = 'gap'
-dataname = 'ex_traffic_method1_acc'
+projmeth = 'admm'
+dataname = 'ex_davis_method1'
 
 dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
 filename = 'psnr_' + dataname

@@ -74,15 +74,19 @@ def read_data(path):
         data[:,:,i] = cv2.imread(path + filename, cv2.IMREAD_GRAYSCALE)
     return data
 
-def mask_img(origs, masks):
-    meas = (origs * masks)
-    meas = np.sum(meas, axis=2)
-    return meas
-
 def add_noise(y_clear,sigma2):
-    noise = np.random.normal(loc = 0, scale = sqrt(sigma2)/255, size = y_clear.shape) # sigmaでノイズ生成
-    y = y_clear + noise # ブラー画像にノイズを不可
+    noise = np.random.normal(loc = 0, scale = np.sqrt(sigma2), size = y_clear.shape) # sigmaでノイズ生成
+    y = y_clear + noise
     return y
+
+def mask_img(origs, masks, noise = False, sigma2=0):
+    m = (origs * masks)
+    m1 = np.sum(m, axis=2)
+    if noise:
+        for i in range(m.shape[2]):
+            m[:,:,i] = add_noise(m[:,:,i], sigma2)
+    m = np.sum(m, axis=2)
+    return m
 
 class UNROLL_PNP_FASTDVDNET(nn.Module): 
     def __init__(self, max_layers, train_delta=True, train_gamma=False, sigmoid=True):
@@ -245,6 +249,9 @@ else:
     device = torch.device('cpu')
 
 # load data
+np.random.seed(seed=0)
+amount_of_sigma = 1
+sigma2 = np.power(255*0.01*amount_of_sigma,2)
 alldata = []
 
 matfile = maskdir + '/' + alldatname[0] + '_cacti.mat'
@@ -260,8 +267,10 @@ for dirname in dirnames[:-9]:
     meas = np.zeros((orig.shape[0], orig.shape[1], int(orig.shape[2]/8)))
     for i in range(int(orig.shape[2]/8)):
         start_point = i * mask.shape[2]
-        meas[:,:,i] = np.float32(mask_img(orig[:, :, start_point : start_point + mask.shape[2]], mask))
-        # meas[:,:,i] = add_noise(meas[:,:,i], 12)
+        if amount_of_sigma == 0:
+            meas[:,:,i] = np.float32(mask_img(orig[:, :, start_point : start_point + mask.shape[2]], mask, noise=False))
+        else:
+            meas[:,:,i] = np.float32(mask_img(orig[:, :, start_point : start_point + mask.shape[2]], mask, noise=True, sigma2=sigma2))
 
     meas = np.float32(meas)
     meas = torch.from_numpy(meas).to(device)
@@ -300,7 +309,7 @@ train_delta = False
 train_gamma = False
 
 resultsdir = "./results/trainning_data/" + projmeth + '/'
-file_n = '_' + "ex_davis_method1"
+file_n = '_' + "davis_acc_train_add_noise"
 # file_n = '_' + "ex_kobe_method1_acc_delta"
 
 # Parameter setting
@@ -340,7 +349,7 @@ train = alldata
 # test = torch.Tensor(test).to(device)
 
 start = time.time()
-
+np.random.seed(seed=0)
 mseloss = torch.nn.MSELoss()
 max_layers = 1
 # incremental trainnig
