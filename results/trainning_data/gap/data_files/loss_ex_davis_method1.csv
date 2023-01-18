@@ -1,0 +1,2 @@
+1,"tensor(0.0042, device='cuda:0', grad_fn=<DivBackward0>)"
+2,"tensor(0.0074, device='cuda:0', grad_fn=<DivBackward0>)"
