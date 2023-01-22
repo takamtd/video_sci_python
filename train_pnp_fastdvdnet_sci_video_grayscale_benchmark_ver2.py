@@ -250,7 +250,7 @@ else:
 
 # load data
 np.random.seed(seed=0)
-amount_of_sigma = 1
+amount_of_sigma = 0
 sigma2 = np.power(255*0.01*amount_of_sigma,2)
 alldata = []
 
@@ -300,7 +300,7 @@ import torch
 from packages.fastdvdnet.my_models import FastDVDnet
 
 ## [2.2] GAP-FastDVDnet
-projmeth = 'admm' # projection method
+projmeth = 'gap' # projection method
 _lambda = 1 # regularization factor
 accelerate = False # enable accelerated version of GAP
 denoiser = 'fastdvdnet' # video non-local network 
@@ -309,7 +309,7 @@ train_delta = False
 train_gamma = False
 
 resultsdir = "./results/trainning_data/" + projmeth + '/'
-file_n = '_' + "davis_acc_train_add_noise"
+file_n = '_' + "ex_davis_method1"
 # file_n = '_' + "ex_kobe_method1_acc_delta"
 
 # Parameter setting

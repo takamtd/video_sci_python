@@ -1,14 +1,17 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import japanize_matplotlib
 import numpy as np
 import os
 import statistics
 
-method_name ="ex_davis_method1"
-projmeth = 'admm'
-# datanames = ['kobe32','runner40','drop40','crash32','aerial32']
-test_datanames = ['kobe32','traffic48', 'runner40','drop40','crash32','aerial32']
-accelerate = False
+method_name ="ex_davis_method1_acc"
+# method_name ="ex_davis_method1_acc_add_meas_noise"
+# method_name ="davis_acc_train_add_noise_add_meas_noise"
+projmeth = 'gap'
+test_datanames = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
+accelerate = True
+noise = False
 
 dir_path = "/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/'
 dir_path += method_name + '/'
@@ -26,9 +29,15 @@ for test_dataname in test_datanames:
     dirnames.append(test_dataname)
 dirnames.sort()
 if accelerate:
-    comp = 'method1_acc'
+    if noise:
+        comp = 'method1_acc_add_meas_noise'
+    else:
+        comp = 'method1_acc'
 else:
-    comp = 'method1'
+    if noise:
+        comp = 'method1_add_meas_noise'
+    else:
+        comp = 'method1'
 file_names = [method_name, comp]
 file_paths1 = [dir_path + dirname + '/' + 'psnrall_' + method_name + ".csv" for dirname in dirnames[:-9]]
 file_paths2 = ["/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/' + comp + "/" + dirname + '/' + 'psnrall_' + comp + ".csv" for dirname in dirnames[:-9]]
@@ -55,14 +64,16 @@ data1 = pd.DataFrame(data1)
 data1 = data1.mean(axis=0)
 data2 = pd.DataFrame(data2)
 data2 = data2.mean(axis=0)
-
+x = [i+1 for i in range(60)]
 # 複数用 PSNR
 fig = plt.figure(0)
-plt.plot(data1, linestyle = "-", label = 'ours')
-plt.plot(data2, linestyle = "--", label = 'Yuan[1]')
-# plt.ylim([0,35])
+plt.plot(x, data1, linestyle = "-", label = 'ours')
+plt.plot(x, data2, linestyle = "--", label = 'Yuan[1]')
+plt.ylim([0, 35])
+plt.xlim([0, 60])
 plt.legend(loc = "lower right")
-plt.xlabel("iteration number")
-plt.ylabel("psnr")
+plt.xlabel("反復回数$k$", fontsize=20)
+plt.ylabel("PSNR", fontsize=20)
+plt.tight_layout()
 curr_graph_path = graph_path + "{}.png".format("psnrall")
 plt.savefig(curr_graph_path)

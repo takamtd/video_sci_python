@@ -5,10 +5,12 @@ import os
 import statistics
 
 method_name ="ex_davis_method1_acc"
+# method_name ="ex_davis_method1_acc_add_meas_noise"
+# method_name ="davis_acc_train_add_noise_add_meas_noise"
 projmeth = 'gap'
-# datanames = ['kobe32','runner40','drop40','crash32','aerial32']
-test_datanames = ['kobe32','traffic48', 'runner40','drop40','crash32','aerial32']
+test_datanames = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 accelerate = True
+noise = False
 
 dir_path = "/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/'
 dir_path += method_name + '/'
@@ -23,9 +25,15 @@ for test_dataname in test_datanames:
 dirnames.sort()
 
 if accelerate:
-    comp = 'method1_acc'
+    if noise:
+        comp = 'method1_acc_add_meas_noise'
+    else:
+        comp = 'method1_acc'
 else:
-    comp = 'method1'
+    if noise:
+        comp = 'method1_add_meas_noise'
+    else:
+        comp = 'method1'
 file_names = [method_name, comp]
 file_paths1 = [dir_path + dirname + '/' + 'psnr_' + method_name + ".csv" for dirname in dirnames[:-9]]
 file_paths2 = ["/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/' + comp + "/" + dirname + '/' + 'psnr_' + comp + ".csv" for dirname in dirnames[:-9]]

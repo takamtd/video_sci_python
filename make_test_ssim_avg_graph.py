@@ -4,10 +4,13 @@ import numpy as np
 import os
 import statistics
 
-method_name ="ex_davis_method1"
-projmeth = 'admm'
-test_datanames = ['kobe32','traffic48', 'runner40','drop40','crash32','aerial32']
-accelerate = False
+method_name ="ex_davis_method1_acc"
+# method_name ="ex_davis_method1_acc_add_meas_noise"
+# method_name ="davis_acc_train_add_noise_add_meas_noise"
+projmeth = 'gap'
+test_datanames = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
+accelerate = True
+noise = False
 
 dir_path = "/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/'
 dir_path += method_name + '/'
@@ -30,8 +33,8 @@ if accelerate:
 else:
     comp = 'method1'
 file_names = [method_name, comp]
-file_paths1 = [dir_path + dirname + '/' + 'ssim_' + method_name + ".csv" for dirname in dirnames[-9:]]
-file_paths2 = ["/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/' + comp + "/" + dirname + '/' + 'ssim_' + comp + ".csv" for dirname in dirnames[-9:]]
+file_paths1 = [dir_path + dirname + '/' + 'ssim_' + method_name + ".csv" for dirname in dirnames]
+file_paths2 = ["/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/' + comp + "/" + dirname + '/' + 'ssim_' + comp + ".csv" for dirname in dirnames]
 
 gragh_path = dir_path + 'test' + '/' + "ssim/"
 if not os.path.exists(gragh_path):

@@ -44,7 +44,7 @@ def read_data(path):
     return data
 
 def add_noise(y_clear,sigma2):
-    noise = np.random.normal(loc = 0, scale = np.sqrt(sigma2)/255, size = y_clear.shape) 
+    noise = np.random.normal(loc = 0, scale = np.sqrt(sigma2), size = y_clear.shape) 
     y = y_clear + noise
     return y
 
@@ -59,14 +59,14 @@ def mask_img(origs, masks, noise = False, sigma2=0):
 
 # [0] environment configuration
 
-alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
-allnframes = [      -1,         -1,        -1,      -1,       -1,        -1]
+# alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
+# allnframes = [      -1,         -1,        -1,      -1,       -1,        -1]
 # alldatname = ['drop40','crash32','aerial32']
 # allnframes = [       1,       -1,        -1]
 # alldatname = ['runner40', 'drop40']
 # allnframes = [        -1,       -1] 
-# alldatname = ['aerial32']
-# allnframes = [      -1]
+alldatname = ['kobe32']
+allnframes = [      -1]
 count = 0
 
 MAXB = 255.
@@ -77,7 +77,7 @@ MAXB = 255.
 
 ## GAP-FastDVDnet
 # projmeth = 'gap' # projection method
-projmeth = 'admm'
+projmeth = 'gap'
 tv_initialize = False
 _lambda = 1 # regularization factor
 accelerate = False # enable accelerated version of GAP
@@ -86,7 +86,7 @@ train_gamma = False
 denoiser = 'fastdvdnet' # video non-local network 
 noise_estimate = False # disable noise estimation for GAP
 
-method_type = 1
+method_type = 9
 OPTION = True
 SAVE_RESULT = False
 SAVE_DATA = True
@@ -117,9 +117,29 @@ elif method_type == 2:
 elif method_type == 3:
     sigma    = [12/255]
     iter_max = [60]
+    if accelerate:
+        if amount_of_sigma == 0:
+            policy_name = 'fixed12_acc'
+        else:
+            policy_name = 'fixed12_acc_add_meas_noise'
+    else:
+        if amount_of_sigma == 0:
+            policy_name = 'fixed12'
+        else:
+            policy_name = 'fixed12_add_meas_noise'
 elif method_type == 4:
-    sigma    = [(50*0.5**(i/30))/255 for i in range(80)]
-    iter_max = [1 for i in range(80)]
+    sigma    = [50/255]
+    iter_max = [60]
+    if accelerate:
+        if amount_of_sigma == 0:
+            policy_name = 'fixed50_acc'
+        else:
+            policy_name = 'fixed50_acc_add_meas_noise'
+    else:
+        if amount_of_sigma == 0:
+            policy_name = 'fixed50'
+        else:
+            policy_name = 'fixed50_add_meas_noise'
 elif method_type == 5:
     sigma    = [(50*0.5**(i/40))/255 for i in range(80)]
     iter_max = [1 for i in range(80)]
@@ -133,9 +153,9 @@ elif method_type == 8:
     sigma    = [(100*0.5**(i/20))/255 for i in range(80)]
     iter_max = [1 for i in range(80)]
 elif method_type == 9:
+    # データの読み込み
     policy_name = 'ex_davis_method1'
     parameter_name = 'sigma'
-    # policy_name = 'kobe_method1'
     
     dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
     filename = parameter_name + '_' + policy_name
@@ -309,7 +329,7 @@ for dirname in dirnames:
         else:
             option_name = policy_name
 
-    savedmatdir = resultsdir + '/savedmat/grayscale/' + projmeth + '/'+ policy_name + '/' + dirname + '/'
+    savedmatdir = resultsdir + '/savedmat/grayscale/' + projmeth + '/'+ option_name + '/' + dirname + '/'
     if not os.path.exists(savedmatdir):
         os.makedirs(savedmatdir)
     # sio.savemat('{}gap{}_{}{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask),

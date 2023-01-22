@@ -6,6 +6,7 @@ import numpy as np
 import scipy.io as sio
 import matplotlib.pyplot as plt
 from statistics import mean
+import cv2
 
 from pnp_sci import admmdenoise_cacti
 
@@ -32,7 +33,7 @@ def relu(x):
     return max(0, x)
 
 def add_noise(y_clear,sigma2):
-    noise = np.random.normal(loc = 0, scale = y_clear.shape[2]*np.sqrt(sigma2)/255, size = y_clear.shape) # sigmaでノイズ生成
+    noise = np.random.normal(loc = 0, scale = y_clear.shape[2]*np.sqrt(sigma2), size = y_clear.shape) # sigmaでノイズ生成
     y = y_clear + noise # ブラー画像にノイズを不可
     return y
 
@@ -44,7 +45,7 @@ allnframes = [      -1,         -1,        -1,      -1,       -1,        -1]
 # allnframes = [       1,       -1,        -1]
 # alldatname = ['runner40', 'drop40']
 # allnframes = [        -1,       -1] 
-# alldatname = ['aerial32']
+# alldatname = ['kobe32']
 # allnframes = [      -1]
 count = 0
 
@@ -56,7 +57,7 @@ MAXB = 255.
 
 ## GAP-FastDVDnet
 # projmeth = 'gap' # projection method
-projmeth = 'admm'
+projmeth = 'gap'
 tv_initialize = False
 _lambda = 1 # regularization factor
 accelerate = False # enable accelerated version of GAP
@@ -65,7 +66,7 @@ train_gamma = False
 denoiser = 'fastdvdnet' # video non-local network 
 noise_estimate = False # disable noise estimation for GAP
 
-method_type = 1
+method_type = 9
 OPTION = True
 SAVE_RESULT = False
 SAVE_DATA = True
@@ -95,9 +96,29 @@ elif method_type == 2:
 elif method_type == 3:
     sigma    = [12/255]
     iter_max = [60]
+    if accelerate:
+        if amount_of_sigma == 0:
+            policy_name = 'fixed12_acc'
+        else:
+            policy_name = 'fixed12_acc_add_meas_noise'
+    else:
+        if amount_of_sigma == 0:
+            policy_name = 'fixed12'
+        else:
+            policy_name = 'fixed12_add_meas_noise'
 elif method_type == 4:
-    sigma    = [(50*0.5**(i/30))/255 for i in range(80)]
-    iter_max = [1 for i in range(80)]
+    sigma    = [50/255]
+    iter_max = [60]
+    if accelerate:
+        if amount_of_sigma == 0:
+            policy_name = 'fixed50_acc'
+        else:
+            policy_name = 'fixed50_acc_add_meas_noise'
+    else:
+        if amount_of_sigma == 0:
+            policy_name = 'fixed50'
+        else:
+            policy_name = 'fixed50_add_meas_noise'
 elif method_type == 5:
     sigma    = [(50*0.5**(i/40))/255 for i in range(80)]
     iter_max = [1 for i in range(80)]
@@ -111,7 +132,7 @@ elif method_type == 8:
     sigma    = [(100*0.5**(i/20))/255 for i in range(80)]
     iter_max = [1 for i in range(80)]
 elif method_type == 9:
-    policy_name = 'ex_davis_method1_acc'
+    policy_name = 'ex_davis_method1'
     parameter_name = 'sigma'
     # policy_name = 'kobe_method1'
     
@@ -299,44 +320,20 @@ for datname, nframe in zip(alldatname, allnframes):
         else:
             option_name = policy_name
 
-    savedmatdir = resultsdir + '/savedmat/grayscale/' + projmeth + '/'+ policy_name + '/' + datname + '/'
+    savedmatdir = resultsdir + '/savedmat/grayscale/' + projmeth + '/'+ option_name + '/' + datname + '/'
     if not os.path.exists(savedmatdir):
         os.makedirs(savedmatdir)
     
     # sio.savemat('{}gap{}_{}{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask),
     #             {'vgapdenoise':vgapdenoise},{'psnr_gapdenoise':psnr_gapdenoise})
     if SAVE_RESULT:
-        if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/'):
-            os.makedirs(savedmatdir + projmeth + 'fastdvdnet/')
-        
-        if tv_initialize:
-            if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}_tv_initialize/'.format(method_type)):
-                os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}_tv_initialize/'.format(method_type))
-        elif OPTION:
-            if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/{}/'.format(option_name)):
-                os.makedirs(savedmatdir + projmeth + 'fastdvdnet/{}/'.format(option_name))
-        else:
-            if not os.path.exists(savedmatdir + projmeth + 'fastdvdnet/method{:d}/'.format(method_type)):
-                os.makedirs(savedmatdir + projmeth + 'fastdvdnet/method{:d}/'.format(method_type))
-        
+        savedir = savedmatdir + "recon_imgs" + "/" # + 'data/csv_folder/'
+        if not os.path.exists(savedir):
+            os.makedirs(savedir)
         for i in range(orig.shape[2]):
-            if tv_initialize:
-                iter_max = 5
-                if i < 10:
-                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}_tv_initialize/{}_{projmeth}fastdvdnet_tv_initialize{:d}_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], iter_max, i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
-                else:
-                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}_tv_initialize/{}_{projmeth}fastdvdnet_tv_initialize{:d}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], iter_max, i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
-            elif OPTION:
-                if i < 10:
-                    plt.imsave('{}{projmeth}fastdvdnet/{option_name}/{}_{projmeth}fastdvdnet_{option_name}_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth, option_name=option_name), vgapfastdvdnet[:,:,i], cmap='Greys_r')
-                else:
-                    plt.imsave('{}{projmeth}fastdvdnet/{option_name}/{}_{projmeth}fastdvdnet_{option_name}_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth, option_name=option_name), vgapfastdvdnet[:,:,i], cmap='Greys_r')
-            else:
-                if i < 10:
-                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}/{}_{projmeth}fastdvdnet_0{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
-                else:
-                    plt.imsave('{}{projmeth}fastdvdnet/method{:d}/{}_{projmeth}fastdvdnet_{:d}.jpeg'.format(savedmatdir, method_type, alldatname[0], i, projmeth=projmeth), vgapfastdvdnet[:,:,i], cmap='Greys_r')
-    
+            # plt.imsave(savedir + '{:03}.bmp'.format(i), vgapfastdvdnet[:,:,i]*255, cmap='Greys_r')
+            cv2.imwrite(savedir + '{:03}.bmp'.format(i), vgapfastdvdnet[:,:,i]*255)
+        
     if SAVE_DATA:
         savedir = savedmatdir # + 'data/csv_folder/'
         if not os.path.exists(savedir):

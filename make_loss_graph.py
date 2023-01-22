@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 projmeth = 'admm'
-dataname = 'ex_davis_method1'
+dataname = 'davis_train_add_noise'
 
 dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
 filename = 'loss_' + dataname
