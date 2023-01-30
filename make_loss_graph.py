@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-projmeth = 'admm'
-dataname = 'davis_train_add_noise'
+projmeth = 'gap'
+dataname = 'davis_acc_train_add_noise5'
 
 dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
 filename = 'loss_' + dataname

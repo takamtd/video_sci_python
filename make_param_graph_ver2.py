@@ -19,42 +19,52 @@ def show_sigma(p):
 def show_param(p):
     return relu(p)
 
-projmeth = 'gap'
-dataname = 'davis_train_add_noise'
+projmeth = 'admm'
+accelerate = False
+if accelerate:
+    datanames = [
+        'ex_davis_method1_acc', 'davis_acc_train_add_noise', 'davis_acc_train_add_noise5'
+    ]
+else:
+    datanames = [
+        'ex_davis_method1', 'davis_train_add_noise', 'davis_train_add_noise5'
+    ]
 parameter_name = 'sigma'
 
-dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
-filename = parameter_name + '_' + dataname
-file_path = dir_path + "data_files/" + filename + ".csv"
-gragh_path = dir_path + dataname + "/param/"
-data = pd.read_csv(file_path, usecols=[1], header=None)
-data = pd.Series(data[1])
-data = data.str.replace('\[','')
-data = data.str.replace('\]','')
-data = data.str.split(', ', expand=True)
-data = data.astype(float)
-# print(data.iloc[-1])
-if not os.path.exists(gragh_path):
-    os.makedirs(gragh_path)
-    
-x = [i+1 for i in range(60)]
-fig = plt.figure(0)
-if parameter_name == "sigma":
-    plt.plot(x, show_sigma(data.iloc[-1]), linestyle = "-")
-    # plt.plot(show_sigma(data.iloc[403]), linestyle = "-")
-else:
-    plt.plot(x, show_param(data.iloc[-1]), linestyle = "-")
-    # plt.plot(show_param(data.iloc[135]), linestyle = "-")
+for n, dataname in enumerate(datanames):
+    dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
+    filename = parameter_name + '_' + dataname
+    file_path = dir_path + "data_files/" + filename + ".csv"
+    gragh_path = dir_path + dataname + "/param/"
+    data = pd.read_csv(file_path, usecols=[1], header=None)
+    data = pd.Series(data[1])
+    data = data.str.replace('\[','')
+    data = data.str.replace('\]','')
+    data = data.str.split(', ', expand=True)
+    data = data.astype(float)
+    # print(data.iloc[-1])
+    if not os.path.exists(gragh_path):
+        os.makedirs(gragh_path)
+        
+    plt.rcParams["font.size"] = 16
+    x = [i+1 for i in range(60)]
+    fig = plt.figure(n)
+    if parameter_name == "sigma":
+        plt.plot(x, show_sigma(data.iloc[-1]), linestyle = "-")
+        # plt.plot(show_sigma(data.iloc[403]), linestyle = "-")
+    else:
+        plt.plot(x, show_param(data.iloc[-1]), linestyle = "-")
+        # plt.plot(show_param(data.iloc[135]), linestyle = "-")
 
-plt.rcParams["font.size"] = 18
-plt.ylim([0, 150])
-plt.xlim([0, 60])
-plt.xlabel("反復回数$k$", fontsize=20)
-plt.ylabel("パラメータ$\sigma_k$", fontsize=20)
-plt.tight_layout()
-curr_gragh_path = gragh_path + "{}.png".format(filename)
-# curr_gragh_path = gragh_path + "{}.png".format(filename + "135")
-# curr_gragh_path = gragh_path + "{}.png".format(filename + "403")
-# curr_gragh_path = gragh_path + "{}.png".format(filename + "671")
-plt.savefig(curr_gragh_path)
+    plt.ylim([0, 170])
+    plt.xlim([0, 60])
+    plt.xlabel("反復回数$k$", fontsize=18)
+    plt.ylabel("パラメータ$\sigma_k$", fontsize=18)
+    plt.tight_layout()
+    plt.grid()
+    curr_gragh_path = gragh_path + "{}.png".format(filename)
+    # curr_gragh_path = gragh_path + "{}.png".format(filename + "135")
+    # curr_gragh_path = gragh_path + "{}.png".format(filename + "403")
+    # curr_gragh_path = gragh_path + "{}.png".format(filename + "642")
+    plt.savefig(curr_gragh_path)
 

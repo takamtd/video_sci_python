@@ -5,14 +5,28 @@ import numpy as np
 import os
 import statistics
 
-method_name ="ex_davis_method1_acc"
-# method_name ="ex_davis_method1_acc_add_meas_noise"
-# method_name ="davis_acc_train_add_noise_add_meas_noise"
-projmeth = 'gap'
-test_datanames = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
-accelerate = True
-noise = False
+# projmeth = 'gap'
+# accelerate = False
+# noise = 5
+# method_name = "ex_davis_method1"
+# method_name = "davis_train_add_noise_add_meas_noise"
+# method_name = "davis_train_add_noise5_add_meas_noise5"
 
+# projmeth = 'gap'
+# accelerate = True
+# noise = 5
+# method_name = "ex_davis_method1_acc"
+# method_name = "davis_acc_train_add_noise_add_meas_noise"
+# method_name = "davis_acc_train_add_noise5_add_meas_noise5"
+
+projmeth = 'admm'
+accelerate = False
+noise = 5
+# method_name = "ex_davis_method1"
+# method_name = "davis_train_add_noise_add_meas_noise"
+method_name = "davis_train_add_noise5_add_meas_noise5"
+
+test_datanames = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 dir_path = "/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/'
 dir_path += method_name + '/'
 
@@ -30,13 +44,17 @@ for test_dataname in test_datanames:
 dirnames.sort()
 
 if accelerate:
-    if noise:
+    if noise == 1:
         comp = 'method1_acc_add_meas_noise'
+    elif noise == 5:
+        comp = 'method1_acc_add_meas_noise5'
     else:
         comp = 'method1_acc'
 else:
-    if noise:
+    if noise == 1:
         comp = 'method1_add_meas_noise'
+    elif noise == 5:
+        comp = 'method1_add_meas_noise5'
     else:
         comp = 'method1'
 
@@ -69,13 +87,14 @@ data2 = data2.mean(axis=0)
 x = [i+1 for i in range(60)]
 # 複数用 PSNR
 fig = plt.figure(0)
-plt.plot(x, data1, linestyle = "-", label = 'ours')
-plt.plot(x, data2, linestyle = "--", label = 'Yuan[1]')
+plt.rcParams["font.size"] = 16
+plt.plot(x, data1, linestyle = "-", label = '提案手法')
+plt.plot(x, data2, linestyle = "--", label = '従来手法')
 plt.ylim([0, 35])
 plt.xlim([0, 60])
 plt.legend(loc = "lower right")
-plt.xlabel("反復回数$k$", fontsize=20)
-plt.ylabel("PSNR", fontsize=20)
+plt.xlabel("反復回数$k$", fontsize=18)
+plt.ylabel("PSNR[dB]", fontsize=18)
 plt.tight_layout()
 curr_graph_path = graph_path + "{}.png".format("psnrall")
 plt.savefig(curr_graph_path)

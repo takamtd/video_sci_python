@@ -250,7 +250,7 @@ else:
 
 # load data
 np.random.seed(seed=0)
-amount_of_sigma = 0
+amount_of_sigma = 5
 sigma2 = np.power(255*0.01*amount_of_sigma,2)
 alldata = []
 
@@ -309,7 +309,7 @@ train_delta = False
 train_gamma = False
 
 resultsdir = "./results/trainning_data/" + projmeth + '/'
-file_n = '_' + "ex_davis_method1"
+file_n = '_' + "davis_train_add_noise5"
 # file_n = '_' + "ex_kobe_method1_acc_delta"
 
 # Parameter setting

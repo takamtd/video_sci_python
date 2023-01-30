@@ -45,7 +45,7 @@ allnframes = [      -1,         -1,        -1,      -1,       -1,        -1]
 # allnframes = [       1,       -1,        -1]
 # alldatname = ['runner40', 'drop40']
 # allnframes = [        -1,       -1] 
-# alldatname = ['kobe32']
+# alldatname = ['traffic48']
 # allnframes = [      -1]
 count = 0
 
@@ -74,7 +74,7 @@ SAVE_MEAS = False
 
 # ノイズの設定
 np.random.seed(seed=0)
-amount_of_sigma = 1
+amount_of_sigma = 5
 sigma2 = np.power(255*0.01*amount_of_sigma,2)
 
 if method_type == 1:
@@ -84,12 +84,12 @@ if method_type == 1:
         if amount_of_sigma == 0:
             policy_name = 'method1_acc'
         else:
-            policy_name = 'method1_acc_add_meas_noise'
+            policy_name = 'method1_acc_add_meas_noise{}'.format(amount_of_sigma)
     else:
         if amount_of_sigma == 0:
             policy_name = 'method1'
         else:
-            policy_name = 'method1_add_meas_noise'
+            policy_name = 'method1_add_meas_noise{}'.format(amount_of_sigma)
 elif method_type == 2:
     sigma    = [50*0.97**i/255 for i in range(60)]
     iter_max = [1 for i in range(60)]
@@ -132,7 +132,7 @@ elif method_type == 8:
     sigma    = [(100*0.5**(i/20))/255 for i in range(80)]
     iter_max = [1 for i in range(80)]
 elif method_type == 9:
-    policy_name = 'ex_davis_method1'
+    policy_name = 'davis_train_add_noise'
     parameter_name = 'sigma'
     # policy_name = 'kobe_method1'
     
@@ -316,7 +316,7 @@ for datname, nframe in zip(alldatname, allnframes):
     
     if OPTION:
         if method_type == 9 and amount_of_sigma != 0:
-            option_name = policy_name + "_add_meas_noise"
+            option_name = policy_name + '_add_meas_noise{}'.format(amount_of_sigma)
         else:
             option_name = policy_name
 
@@ -368,20 +368,3 @@ for datname, nframe in zip(alldatname, allnframes):
         for i in range(meas.shape[2]):
             plt.imsave('{}meas/meas{}.jpeg'.format(savedmatdir, i), meas[:,:,i], cmap='Greys_r')
     
-    # sio.savemat('{}gap{}_{}_{:d}_sigma{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask,int(sigma[-1]*MAXB)),
-    #             {'vgaptv':vgaptv, 
-    #              'psnr_gaptv':psnr_gaptv,
-    #              'ssim_gaptv':ssim_gaptv,
-    #              'psnrall_tv':psnrall_gaptv,
-    #              'tgaptv':tgaptv,
-    #              'vgapffdnet':vgapffdnet, 
-    #              'psnr_gapffdnet':psnr_gapffdnet,
-    #              'ssim_gapffdnet':ssim_gapffdnet,
-    #              'psnrall_ffdnet':psnrall_gapffdnet,
-    #              'tgapffdnet':tgapffdnet,
-    #              'vgapfastdvdnet':vgapfastdvdnet, 
-    #              'psnr_gapfastdvdnet':psnr_gapfastdvdnet,
-    #              'ssim_gapfastdvdnet':ssim_gapfastdvdnet,
-    #              'psnrall_fastdvdnet':psnrall_gapfastdvdnet,
-    #              'tgapfastdvdnet':tgapfastdvdnet})
-

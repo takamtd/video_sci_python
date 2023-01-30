@@ -1,0 +1,6 @@
+python3 make_train_psnr_avg_graph.py 
+python3 make_train_ssim_avg_graph.py 
+python3 make_test_psnr_avg_graph.py 
+python3 make_test_ssim_avg_graph.py
+python3 make_train_psnrall_graph.py
+python3 make_test_psnrall_graph.py

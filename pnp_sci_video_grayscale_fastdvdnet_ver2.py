@@ -94,7 +94,7 @@ SAVE_MEAS = False
 
 # ノイズの設定
 np.random.seed(seed=0)
-amount_of_sigma = 1
+amount_of_sigma = 5
 sigma2 = np.power(255*0.01*amount_of_sigma,2)
 
 if method_type == 1:
@@ -104,12 +104,13 @@ if method_type == 1:
         if amount_of_sigma == 0:
             policy_name = 'method1_acc'
         else:
-            policy_name = 'method1_acc_add_meas_noise'
+            policy_name = 'method1_acc_add_meas_noise{}'.format(amount_of_sigma)
+            # policy_name = 'method1_acc_add_meas_noise'
     else:
         if amount_of_sigma == 0:
             policy_name = 'method1'
         else:
-            policy_name = 'method1_add_meas_noise'
+            policy_name = 'method1_add_meas_noise{}'.format(amount_of_sigma)
     # policy_name = 'method1'
 elif method_type == 2:
     sigma    = [50*0.97**i/255 for i in range(60)]
@@ -154,7 +155,8 @@ elif method_type == 8:
     iter_max = [1 for i in range(80)]
 elif method_type == 9:
     # データの読み込み
-    policy_name = 'ex_davis_method1'
+    # policy_name = 'ex_davis_method1_acc'
+    policy_name = 'davis_train_add_noise'
     parameter_name = 'sigma'
     
     dir_path = "/home/jovyan/workdir/results/" + "trainning_data/" + projmeth + '/'
@@ -231,11 +233,11 @@ matfile = maskdir + '/' + alldatname[0] + '_cacti.mat'
 file = sio.loadmat(matfile)
 mask = np.float32(file['mask'])
 
-
 dirnames = os.listdir(datasetdir)
 dirnames.sort()
-# for dirname in dirnames[-9:]:
 for dirname in dirnames:
+# for dirname in dirnames[-9:]:
+# for dirname in dirnames[-6:-5]:
     #DAVISデータの読み込み
     orig = np.float32(read_data(datasetdir + "/" + dirname + "/" + "orig/"))
     meas = np.zeros((orig.shape[0], orig.shape[1], int(orig.shape[2]/8)))
@@ -325,7 +327,8 @@ for dirname in dirnames:
     
     if OPTION:
         if method_type == 9 and amount_of_sigma != 0:
-            option_name = policy_name + "_add_meas_noise"
+            option_name = policy_name + '_add_meas_noise{}'.format(amount_of_sigma)
+            # option_name = policy_name + '_add_meas_noise'
         else:
             option_name = policy_name
 
@@ -376,20 +379,3 @@ for dirname in dirnames:
         for i in range(meas.shape[2]):
             plt.imsave('{}meas/meas{}.jpeg'.format(savedmatdir, i), meas[:,:,i], cmap='Greys_r')
     
-    # sio.savemat('{}gap{}_{}_{:d}_sigma{:d}.mat'.format(savedmatdir,denoiser.lower(),datname,nmask,int(sigma[-1]*MAXB)),
-    #             {'vgaptv':vgaptv, 
-    #              'psnr_gaptv':psnr_gaptv,
-    #              'ssim_gaptv':ssim_gaptv,
-    #              'psnrall_tv':psnrall_gaptv,
-    #              'tgaptv':tgaptv,
-    #              'vgapffdnet':vgapffdnet, 
-    #              'psnr_gapffdnet':psnr_gapffdnet,
-    #              'ssim_gapffdnet':ssim_gapffdnet,
-    #              'psnrall_ffdnet':psnrall_gapffdnet,
-    #              'tgapffdnet':tgapffdnet,
-    #              'vgapfastdvdnet':vgapfastdvdnet, 
-    #              'psnr_gapfastdvdnet':psnr_gapfastdvdnet,
-    #              'ssim_gapfastdvdnet':ssim_gapfastdvdnet,
-    #              'psnrall_fastdvdnet':psnrall_gapfastdvdnet,
-    #              'tgapfastdvdnet':tgapfastdvdnet})
-
