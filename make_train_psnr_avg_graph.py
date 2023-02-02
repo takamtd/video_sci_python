@@ -6,9 +6,9 @@ import statistics
 
 projmeth = 'gap'
 accelerate = False
-noise = 0
-# method_name = "ex_davis_method1"
-method_name = "davis_train_add_noise"
+noise = 5
+method_name = "ex_davis_method1_add_meas_noise5_ver2"
+# method_name = "davis_train_add_noise"
 # method_name = "davis_train_add_noise5"
 
 # projmeth = 'gap'

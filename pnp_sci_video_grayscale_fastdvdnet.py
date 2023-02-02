@@ -39,14 +39,14 @@ def add_noise(y_clear,sigma2):
 
 # [0] environment configuration
 
-alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
-allnframes = [      -1,         -1,        -1,      -1,       -1,        -1]
+# alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
+# allnframes = [      -1,         -1,        -1,      -1,       -1,        -1]
 # alldatname = ['drop40','crash32','aerial32']
 # allnframes = [       1,       -1,        -1]
 # alldatname = ['runner40', 'drop40']
 # allnframes = [        -1,       -1] 
-# alldatname = ['traffic48']
-# allnframes = [      -1]
+alldatname = ['traffic48']
+allnframes = [      -1]
 count = 0
 
 MAXB = 255.
@@ -57,7 +57,7 @@ MAXB = 255.
 
 ## GAP-FastDVDnet
 # projmeth = 'gap' # projection method
-projmeth = 'gap'
+projmeth = 'admm'
 tv_initialize = False
 _lambda = 1 # regularization factor
 accelerate = False # enable accelerated version of GAP
@@ -66,15 +66,15 @@ train_gamma = False
 denoiser = 'fastdvdnet' # video non-local network 
 noise_estimate = False # disable noise estimation for GAP
 
-method_type = 9
+method_type = 1
 OPTION = True
-SAVE_RESULT = False
-SAVE_DATA = True
+SAVE_RESULT = True
+SAVE_DATA = False
 SAVE_MEAS = False
 
 # ノイズの設定
 np.random.seed(seed=0)
-amount_of_sigma = 5
+amount_of_sigma = 1
 sigma2 = np.power(255*0.01*amount_of_sigma,2)
 
 if method_type == 1:
@@ -132,7 +132,8 @@ elif method_type == 8:
     sigma    = [(100*0.5**(i/20))/255 for i in range(80)]
     iter_max = [1 for i in range(80)]
 elif method_type == 9:
-    policy_name = 'davis_train_add_noise'
+    # policy_name = 'ex_davis_method1'
+    policy_name = 'davis_train_add_noise5'
     parameter_name = 'sigma'
     # policy_name = 'kobe_method1'
     

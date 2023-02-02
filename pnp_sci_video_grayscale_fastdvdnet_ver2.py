@@ -77,7 +77,7 @@ MAXB = 255.
 
 ## GAP-FastDVDnet
 # projmeth = 'gap' # projection method
-projmeth = 'gap'
+projmeth = 'admm'
 tv_initialize = False
 _lambda = 1 # regularization factor
 accelerate = False # enable accelerated version of GAP
@@ -88,13 +88,13 @@ noise_estimate = False # disable noise estimation for GAP
 
 method_type = 9
 OPTION = True
-SAVE_RESULT = False
-SAVE_DATA = True
+SAVE_RESULT = True
+SAVE_DATA = False
 SAVE_MEAS = False
 
 # ノイズの設定
 np.random.seed(seed=0)
-amount_of_sigma = 5
+amount_of_sigma = 1
 sigma2 = np.power(255*0.01*amount_of_sigma,2)
 
 if method_type == 1:
@@ -155,7 +155,7 @@ elif method_type == 8:
     iter_max = [1 for i in range(80)]
 elif method_type == 9:
     # データの読み込み
-    # policy_name = 'ex_davis_method1_acc'
+    # policy_name = 'ex_davis_method1'
     policy_name = 'davis_train_add_noise'
     parameter_name = 'sigma'
     
@@ -235,9 +235,9 @@ mask = np.float32(file['mask'])
 
 dirnames = os.listdir(datasetdir)
 dirnames.sort()
-for dirname in dirnames:
+# for dirname in dirnames:
 # for dirname in dirnames[-9:]:
-# for dirname in dirnames[-6:-5]:
+for dirname in dirnames[-6:-5]:
     #DAVISデータの読み込み
     orig = np.float32(read_data(datasetdir + "/" + dirname + "/" + "orig/"))
     meas = np.zeros((orig.shape[0], orig.shape[1], int(orig.shape[2]/8)))

@@ -24,6 +24,11 @@ def process(file_path):
 def save_img(img, file_path):
     cv2.imwrite(file_path, img)
 
+def add_noise(y_clear,sigma2):
+    noise = np.random.normal(loc = 0, scale = y_clear.shape[2]*np.sqrt(sigma2), size = y_clear.shape) # sigmaでノイズ生成
+    y = y_clear + noise # ブラー画像にノイズを不可
+    return y
+
 def get_mask():
     datasetdir = './dataset/cacti/grayscale_benchmark'
     datname = 'kobe32'
@@ -41,6 +46,7 @@ def mask_img(origs, masks):
 
 def recursive_file_check(path, save_path):
     # ディレクトリが１段の場合のみ有効
+    np.random.seed(seed=0)
     count = 0
     B = 8
     masks = get_mask()
@@ -63,11 +69,11 @@ def recursive_file_check(path, save_path):
                 save_img(img, save_path + "/" + dirname + "/" + "orig/orig{:03}.bmp".format(i*B + j))
                 imgs.append(img)
                 print(save_path + "/" + dirname + "/" + "orig/orig{:03}.bmp".format(i*B + j))
-            maes = mask_img(imgs, masks)
+            # maes = mask_img(imgs, masks)
             # print(maes)
-            if not os.path.exists(save_path + "/" + dirname + "/" + "/meas/"):
-                os.makedirs(save_path + "/" + dirname + "/" + "meas/")
-            save_img(maes, save_path + "/" + dirname + "/" + "meas/meas{:02}.bmp".format(i))
+            # if not os.path.exists(save_path + "/" + dirname + "/" + "/meas/"):
+            #     os.makedirs(save_path + "/" + dirname + "/" + "meas/")
+            # save_img(maes, save_path + "/" + dirname + "/" + "meas/meas{:02}.bmp".format(i))
             count += 1
         print()
     print(count)

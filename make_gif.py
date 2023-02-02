@@ -6,12 +6,12 @@ import scipy.io as sio
 from scipy.io.matlab.miobase import get_matfile_version
 
 datasetdir = './dataset/cacti/grayscale_benchmark' # dataset
-# alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
-datname = 'aerial32'
+# alldatname = ['traffic48','traffic48','runner40','drop40','crash32','aerial32']
+datname = 'traffic48'
 matfile = datasetdir + '/' + datname + '_cacti.mat' # path of the .mat data file
 
 resultsdir = './results'
-savedatadir = resultsdir + '/savedmat/grayscale/' + datname + '/'
+savedatadir = resultsdir + '/savedmat/grayscale/'
 
 # [1] load data
 # if get_matfile_version(_open_file(matfile, appendmat=True)[0])[0] < 2: # MATLAB .mat v7.2 or lower versions
@@ -49,9 +49,9 @@ def create_gif_from_np(data, out_filename):
  
     # appendした画像配列をGIFにする。durationで持続時間、loopでループ数を指定可能。
     imgs[0].save(out_filename,
-                 save_all=True, append_images=imgs[1:], optimize=False, duration=100/8, loop=0)
+                 save_all=True, append_images=imgs[1:], optimize=False, duration=1000/20, loop=0)
  
 # GIFアニメーションを作成する関数を実行する
 # create_gif(in_dir='/home/jovyan/workdir/results/savedmat/grayscale/kobe32/meas', out_filename='kobe_meas.gif')
-# create_gif_from_np(orig, path='/home/jovyan/workdir/results/savedmat/grayscale/'+datname+'/orig', out_filename=savedatadir+datname[:-2]+'_orig.gif')
-create_gif_from_np(mask*255, out_filename='/home/jovyan/workdir/results/savedmat/grayscale/mask.gif')
+create_gif_from_np(orig, out_filename=savedatadir+datname+'_orig.gif')
+# create_gif_from_np(mask*255, out_filename='/home/jovyan/workdir/results/savedmat/grayscale/mask.gif')

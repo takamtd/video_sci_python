@@ -14,17 +14,17 @@ import statistics
 
 # projmeth = 'gap'
 # accelerate = True
-# noise = 5
+# noise = 0
 # method_name = "ex_davis_method1_acc"
 # method_name = "davis_acc_train_add_noise_add_meas_noise"
 # method_name = "davis_acc_train_add_noise5_add_meas_noise5"
 
 projmeth = 'admm'
 accelerate = False
-noise = 5
-# method_name = "ex_davis_method1"
+noise = 0
+method_name = "ex_davis_method1"
 # method_name = "davis_train_add_noise_add_meas_noise"
-method_name = "davis_train_add_noise5_add_meas_noise5"
+# method_name = "davis_train_add_noise5_add_meas_noise5"
 
 test_datanames = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 dir_path = "/home/jovyan/workdir/results/savedmat/grayscale/" + projmeth + '/'
@@ -88,11 +88,11 @@ x = [i+1 for i in range(60)]
 # 複数用 PSNR
 fig = plt.figure(0)
 plt.rcParams["font.size"] = 16
-plt.plot(x, data1, linestyle = "-", label = '提案手法')
-plt.plot(x, data2, linestyle = "--", label = '従来手法')
+plt.plot(x, data1, linestyle = "-", label = '学習で得られたパラメータ')
+plt.plot(x, data2, linestyle = "--", label = '従来の設定')
 plt.ylim([0, 35])
 plt.xlim([0, 60])
-plt.legend(loc = "lower right")
+plt.legend(loc = "lower right", fontsize=14)
 plt.xlabel("反復回数$k$", fontsize=18)
 plt.ylabel("PSNR[dB]", fontsize=18)
 plt.tight_layout()

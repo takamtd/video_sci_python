@@ -3,8 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-method_name ="ex_davis_method1"
-projmeth = 'admm'
+# method_name ="ex_davis_method1"
+policy_name = 'davis_train_add_noise_add_meas_noise'
+projmeth = 'gap'
 test_datanames = ['kobe32','traffic48', 'runner40','drop40','crash32','aerial32']
 accelerate = False
 
