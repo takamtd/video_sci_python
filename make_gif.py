@@ -49,9 +49,10 @@ def create_gif_from_np(data, out_filename):
  
     # appendした画像配列をGIFにする。durationで持続時間、loopでループ数を指定可能。
     imgs[0].save(out_filename,
-                 save_all=True, append_images=imgs[1:], optimize=False, duration=1000/20, loop=0)
+                 save_all=True, append_images=imgs[1:], optimize=False, duration=1000/20*4, loop=0)
  
 # GIFアニメーションを作成する関数を実行する
-# create_gif(in_dir='/home/jovyan/workdir/results/savedmat/grayscale/kobe32/meas', out_filename='kobe_meas.gif')
-create_gif_from_np(orig, out_filename=savedatadir+datname+'_orig.gif')
-# create_gif_from_np(mask*255, out_filename='/home/jovyan/workdir/results/savedmat/grayscale/mask.gif')
+# create_gif_from_np(orig[:,:,0:8], out_filename=savedatadir+datname+'_orig1f.gif')
+# create_gif_from_np(meas/8, out_filename=savedatadir+datname+'_meas.gif')
+# create_gif_from_np(mask*255, out_filename=savedatadir+datname+'_mask.gif')
+# create_gif_from_np(mask*255, out_filename='mask.gif')
