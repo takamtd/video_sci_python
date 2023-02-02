@@ -9,6 +9,7 @@ import matplotlib.animation as animation
 
 # datadir = '/home/jovyan/workdir/results/savedmat/grayscale/gap/ex_davis_method1_acc/'
 datadir = '/home/jovyan/workdir/results/savedmat/grayscale/gap/method1_acc/'
+
 dataname = 'traffic48'
 savedatadir = datadir + dataname + '/'
 inputdir = savedatadir + 'recon_imgs/'

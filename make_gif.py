@@ -56,3 +56,4 @@ def create_gif_from_np(data, out_filename):
 # create_gif_from_np(meas/8, out_filename=savedatadir+datname+'_meas.gif')
 # create_gif_from_np(mask*255, out_filename=savedatadir+datname+'_mask.gif')
 # create_gif_from_np(mask*255, out_filename='mask.gif')
+Image.fromarray(meas[:,:,0]/8).convert('L').save("/home/jovyan/workdir/results/savedmat/grayscale/gap/traffic48/meas/meas0.bmp")
