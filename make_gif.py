@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import os
 import glob
 import numpy as np
@@ -42,18 +42,25 @@ def create_gif(in_dir, out_filename):
                  save_all=True, append_images=imgs[1:], optimize=False, duration=800, loop=0)
 
 def create_gif_from_np(data, out_filename):
-    imgs = []                                                   # 画像をappendするための空配列を定義
+    imgs = []        
+    font = ImageFont.truetype('n021003l.pfb', 32)
+    # textcolor = (0, 0, 255)
+    textcolor = (255, 255, 255)
     for i in range(data.shape[2]):
         # Numpy配列をImageオブジェクトに変換してリストに追加
-        imgs.append(Image.fromarray(np.uint8(data[:,:,i])).convert('P'))
+        img = Image.fromarray(np.uint8(data[:,:,i]))
+        img = img.convert('RGB')
+        draw = ImageDraw.Draw(img)
+        draw.text((230, 220), '{}'.format(i//8+1), fill=textcolor, font=font)
+        imgs.append(img)
  
     # appendした画像配列をGIFにする。durationで持続時間、loopでループ数を指定可能。
     imgs[0].save(out_filename,
-                 save_all=True, append_images=imgs[1:], optimize=False, duration=1000/20*4, loop=0)
+                 save_all=True, append_images=imgs[1:], optimize=False, duration=1000/20, loop=0)
  
 # GIFアニメーションを作成する関数を実行する
-# create_gif_from_np(orig[:,:,0:8], out_filename=savedatadir+datname+'_orig1f.gif')
-# create_gif_from_np(meas/8, out_filename=savedatadir+datname+'_meas.gif')
+create_gif_from_np(orig[:,:,:], out_filename=savedatadir+datname+'_orig_ver5.gif')
+# create_gif_from_np(meas/8, out_filename=savedatadir+datname+'_meas_ver5.gif')
 # create_gif_from_np(mask*255, out_filename=savedatadir+datname+'_mask.gif')
 # create_gif_from_np(mask*255, out_filename='mask.gif')
-Image.fromarray(meas[:,:,0]/8).convert('L').save("/home/jovyan/workdir/results/savedmat/grayscale/gap/traffic48/meas/meas0.bmp")
+# Image.fromarray(meas[:,:,0]/8).convert('L').save("/home/jovyan/workdir/results/savedmat/grayscale/gap/traffic48/meas/meas0.bmp")

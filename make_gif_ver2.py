@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import os
 import glob
 import numpy as np
@@ -13,7 +13,7 @@ datadir = '/home/jovyan/workdir/results/savedmat/grayscale/gap/method1_acc/'
 dataname = 'traffic48'
 savedatadir = datadir + dataname + '/'
 inputdir = savedatadir + 'recon_imgs/'
-savefile = savedatadir + dataname + '.gif'
+savefile = savedatadir + dataname + '_ver5.gif'
 # alldatname = ['kobe32','traffic48','runner40','drop40','crash32','aerial32']
 # datname = 'aerial32'
 # matfile = datasetdir + '/' + datname + '_cacti.mat' # path of the .mat data file
@@ -26,16 +26,23 @@ savefile = savedatadir + dataname + '.gif'
 # orig = np.float32(file['orig'])
 
  
-# GIFアニメーションを作成
+# GIFアニメーションを作成 n021003l.pfb s050000l.pfb
 def create_gif(in_dir, out_filename):
     path_list = sorted(glob.glob(os.path.join(*[in_dir, '*']))) # ファイルパスをソートしてリストする
     imgs = []                                                   # 画像をappendするための空配列を定義
     # print(path_list)
+    font = ImageFont.truetype('n021003l.pfb', 32)
     # ファイルのフルパスからファイル名と拡張子を抽出
+    # textcolor = (0, 0, 255)
+    textcolor = (255, 255, 255)
     for i in range(len(path_list)):
         img = Image.open(path_list[i])                          # 画像ファイルを1つずつ開く
         # img = Image.fromarray(np.array(img))
-        imgs.append(img.convert('P'))                                        # 画像をappendで配列に格納していく
+        img = img.convert('RGB')
+        draw = ImageDraw.Draw(img)
+        draw.text((230, 220), '{}'.format(i//8 + 1), fill=textcolor, font=font)
+        # img = img.convert('P')
+        imgs.append(img)
     print(len(imgs))
     print(imgs[-1])
     # print(img[0].mode)
