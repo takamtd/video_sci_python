@@ -19,8 +19,8 @@ def show_sigma(p):
 def show_param(p):
     return relu(p)
 
-projmeth = 'admm'
-accelerate = False
+projmeth = 'gap'
+accelerate = True
 if accelerate:
     datanames = [
         'ex_davis_method1_acc', 'davis_acc_train_add_noise', 'davis_acc_train_add_noise5'
@@ -45,12 +45,15 @@ for n, dataname in enumerate(datanames):
     # print(data.iloc[-1])
     if not os.path.exists(gragh_path):
         os.makedirs(gragh_path)
-        
+    
     plt.rcParams["font.size"] = 16
     x = [i+1 for i in range(60)]
+    y = [50,50,25,12]
+    x2 = [0,20,40,60]
     fig = plt.figure(n)
     if parameter_name == "sigma":
-        plt.plot(x, show_sigma(data.iloc[-1]), linestyle = "-")
+        plt.plot(x, show_sigma(data.iloc[-1]), linestyle = "-", label = '学習で得られたパラメータ')
+        plt.step(x2, y, linestyle = "--", label = '従来の設定')
         # plt.plot(show_sigma(data.iloc[403]), linestyle = "-")
     else:
         plt.plot(x, show_param(data.iloc[-1]), linestyle = "-")
@@ -60,6 +63,7 @@ for n, dataname in enumerate(datanames):
     plt.xlim([0, 60])
     plt.xlabel("反復回数$k$", fontsize=18)
     plt.ylabel("パラメータ$\sigma_k$", fontsize=18)
+    plt.legend(loc = "upper right", fontsize=14)
     plt.tight_layout()
     plt.grid()
     curr_gragh_path = gragh_path + "{}.png".format(filename)
