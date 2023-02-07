@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import japanize_matplotlib
 import numpy as np
 import os
 
@@ -241,7 +242,11 @@ plt.xlim([0,60])
 plt.step(x2, y, linestyle = "--", label = '学習初期値', color='#ff7f0e')
 # plt.ylim([-50,300])
 # plt.xlim([-6,6])
+# plt.title("$sigma_k$の初期値")
+plt.xlabel("反復回数$k$", fontsize=18)
+plt.ylabel("パラメータ$\sigma_k$", fontsize=18)
 plt.tick_params(labelsize=16)
+plt.tight_layout()
 curr_gragh_path = "{}.png".format("method1")
 # curr_gragh_path = "{}.png".format("sigmoid255")
 plt.savefig(curr_gragh_path)
