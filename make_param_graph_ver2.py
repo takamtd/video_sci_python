@@ -53,7 +53,7 @@ for n, dataname in enumerate(datanames):
     fig = plt.figure(n)
     if parameter_name == "sigma":
         plt.plot(x, show_sigma(data.iloc[-1]), linestyle = "-", label = '学習で得られたパラメータ')
-        plt.step(x2, y, linestyle = "--", label = '従来の設定')
+        plt.step(x2, y, linestyle = "--", label = '学習初期値')
         # plt.plot(show_sigma(data.iloc[403]), linestyle = "-")
     else:
         plt.plot(x, show_param(data.iloc[-1]), linestyle = "-")
