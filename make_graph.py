@@ -228,25 +228,23 @@ def sigmoid(x):
 
 # sigma可視化用
 fig = plt.figure(0)
-x = np.arange(-6, 6, 0.1)
-# sig = [50] * 20
-# sig = sig + [25] * 20
-# sig = sig + [12] * 20
-# print(sig)
-# plt.plot(x, sigmoid(x)*255, linestyle = "-")
-y = [50,50,25,12]
-x2 = [0,20,40,60]
-plt.grid()
-plt.ylim([0,75])
-plt.xlim([0,60])
-plt.step(x2, y, linestyle = "--", label = '学習初期値', color='#ff7f0e')
-# plt.ylim([-50,300])
-# plt.xlim([-6,6])
-# plt.title("$sigma_k$の初期値")
-plt.xlabel("反復回数$k$", fontsize=18)
-plt.ylabel("パラメータ$\sigma_k$", fontsize=18)
-plt.tick_params(labelsize=16)
+plt.tick_params(labelsize=24)
 plt.tight_layout()
-curr_gragh_path = "{}.png".format("method1")
-# curr_gragh_path = "{}.png".format("sigmoid255")
+plt.grid()
+x = np.arange(-6, 6, 0.1)
+plt.plot(x, sigmoid(x)*255, linestyle = "-")
+plt.ylim([-50,300])
+plt.xlim([-6,6])
+# y = [50,50,25,12]
+# x2 = [0,20,40,60]
+# plt.ylim([0,75])
+# plt.xlim([0,60])
+# plt.step(x2, y, linestyle = "--", label = '学習初期値', color='#ff7f0e')
+
+# plt.title("$sigma_k$の初期値")
+# plt.xlabel("反復回数$k$", fontsize=18)
+# plt.ylabel("パラメータ$\sigma_k$", fontsize=18)
+
+# curr_gragh_path = "{}.png".format("method1_ver2")
+curr_gragh_path = "{}.png".format("sigmoid255_ver2")
 plt.savefig(curr_gragh_path)
