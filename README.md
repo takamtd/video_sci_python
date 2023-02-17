@@ -1,5 +1,5 @@
 # video_sci_python
 
-train_pnp_fastdvdnet_sci_video_grayscale_benchmark_ver2.py でパラメータを学習
-pnp_sci_video_grayscale_fastdvdnet.py と pnp_sci_video_grayscale_fastdvdnet_ver2.py で訓練したパラメータで復元
-pnp_sci_video_grayscale_fastdvdnet_ver2.py は Davis データセット用
+- train_pnp_fastdvdnet_sci_video_grayscale_benchmark_ver2.py でパラメータを学習
+- pnp_sci_video_grayscale_fastdvdnet.py と pnp_sci_video_grayscale_fastdvdnet_ver2.py で訓練したパラメータで復元
+- pnp_sci_video_grayscale_fastdvdnet_ver2.py は Davis データセット用
